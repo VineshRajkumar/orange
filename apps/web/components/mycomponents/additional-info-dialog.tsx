@@ -78,7 +78,7 @@ export function AdditionalInfoDialog() {
                     
                     {/* star */}
                     <Link
-                        href="https://github.com/your-repo"
+                        href="https://github.com/VineshRajkumar/orange.git"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center justify-between w-full hover:text-yellow-500 transition-colors"
