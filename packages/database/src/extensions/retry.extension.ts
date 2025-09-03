@@ -1,5 +1,5 @@
 import { Prisma } from "@prisma/client/extension";
-import { ApiError } from "@repo/backend-common"
+
 
 //NEON DB OFTEN SLEEPS SO SOMETIMES THE DB SERVER MIGHT TAKE TIME TO START 
 // BUT IF PRISMA FIRES REQUEST BEFORE IT STARTS THEN IT WILL GIVEN THE 
