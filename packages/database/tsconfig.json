@@ -1,0 +1,10 @@
+{
+  "extends": "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"], //if any issue regarding cannot overwrite in deployment or build copy this include and exclude to main base.json 
+  //try to delete dist and again generate while each time you make changes 
+  "exclude": ["node_modules", "dist"]
+}

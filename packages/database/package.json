@@ -1,0 +1,25 @@
+{
+    "name": "@repo/db",
+    "version": "0.0.0",
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "scripts": {
+        "db:migrate": "prisma migrate dev --skip-generate",
+        "db:deploy": "prisma migrate deploy",
+        "db:generate": "prisma generate",
+        "dev": "tsc -b && node ./dist/index.js",
+        "start": "node ./dist/index.js",
+        "build": "tsc -b"
+    },
+    "devDependencies": {
+        "@repo/typescript-config": "workspace:*",
+        "prisma": "^6.15.0"
+    },
+    "dependencies": {
+        "@prisma/client": "^6.15.0",
+        "@types/bcrypt": "^5.0.2",
+        "@types/node": "^22.15.3",
+        "bcrypt": "^6.0.0"
+    }
+}

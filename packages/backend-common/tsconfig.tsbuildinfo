@@ -1,0 +1,1 @@
+{"root":["./src/index.ts","./src/db/index.ts","./src/types/drawelements.type.ts","./src/types/safeuser.type.ts","./src/utils/apierror.ts","./src/utils/dbremoveroomid.ts","./src/utils/verifyaccesstoken.ts"],"version":"5.8.3"}

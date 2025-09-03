@@ -1,0 +1,1 @@
+{"root":["./src/connection.ts","./src/index.ts","./src/events/user.event.ts","./src/middlewares/verifyauth.middleware.ts","./src/middlewares/verifyticket.middleware.ts","./src/types/auth.type.ts","./src/utils/apiresponse.ts","./src/utils/asynchandler.ts","./src/utils/roommanager.ts"],"version":"5.8.3"}

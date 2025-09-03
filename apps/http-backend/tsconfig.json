@@ -1,0 +1,12 @@
+{
+  "extends" : "@repo/typescript-config/base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src", 
+    // "allowImportingTsExtensions": true,               /* Allow imports to include TypeScript file extensions. Requires '--moduleResolution bundler' and either '--noEmit' or '--emitDeclarationOnly' to be set. */
+    // "declarationMap": false,
+    // "declaration": false,
+  },
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules", "./dist"]
+}
