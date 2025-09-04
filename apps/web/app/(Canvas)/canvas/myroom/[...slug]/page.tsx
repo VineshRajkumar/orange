@@ -1,15 +1,3 @@
-import Canvas from "@/components/canvas/canvas";
-import { keywords, seo } from "@/components/seo/data";
-import { prismaFrontend } from '@repo/db-client'
-import { Metadata } from "next";
-
-
-type paramType = {
-
-    params: Promise<{ slug: [string, string?] }>
-
-}
-//since sheet are dynamic so load the sheet title - also this page is server side rendering only canvas component renders client side
 
 
 /***Why revalidate is used here ? 
@@ -37,6 +25,20 @@ type paramType = {
 
 export const revalidate = 2592000; // 30 days because sheet title once created wont change explained above 
 export const dynamic = "force-dynamic" //dont call db during build only during runtime 
+
+import Canvas from "@/components/canvas/canvas";
+import { keywords, seo } from "@/components/seo/data";
+import { prismaFrontend } from '@repo/db-client'
+import { Metadata } from "next";
+
+
+type paramType = {
+
+    params: Promise<{ slug: [string, string?] }>
+
+}
+//since sheet are dynamic so load the sheet title - also this page is server side rendering only canvas component renders client side
+
 
 
 async function getSheetTitle(sheetId: string): Promise<string> {
