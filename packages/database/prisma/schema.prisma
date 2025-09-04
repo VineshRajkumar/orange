@@ -7,7 +7,7 @@
 generator client {
   provider = "prisma-client-js"
   previewFeatures = ["fullTextSearchPostgres"]
-  // output   = "../generated/prisma"  //dont send the prisma related thing to this package nodemodule then apps folder cannot access it 
+  output   = "../generated/prisma"  //dont send the prisma related thing to this package nodemodule then apps folder cannot access it 
 }
 
 datasource db {
