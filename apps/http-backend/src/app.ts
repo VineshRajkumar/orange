@@ -9,9 +9,17 @@ dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 const app  = express()
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN,
-    credentials:true //allows server to accept cookies,headers,client certificates etc
+    origin: process.env.CORS_ORIGIN, //so that only frontend can access backend -> security
+    credentials:true, //allows server to accept cookies,headers,client certificates etc
+    methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], //needed for nextjs frontend
+    allowedHeaders: ['Content-Type','Authorization'], //needed for nextjs frontend
 }))
+
+// handle preflight OPTIONS requests for nextjs frontend 
+// Preflight means browser asking permission first to the backend 
+// and OPTIONS handler means backend server giving that permission
+// * here means to match this cors thing to all routes in express
+app.options('*', cors());
 
 //these are for parsing so that when data comes express doesnot face any problem
 app.use(express.json({limit:"16kb"})) //json file limit -  Middleware to parse JSON request bodies
