@@ -21,8 +21,7 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "uuid": "^11.1.0",
-    "zod": "^3.25.64",
-    "@prisma/client": "^6.15.0"
+    "zod": "^3.25.64"
   },
   "devDependencies": {
     "@repo/db": "workspace:*",
