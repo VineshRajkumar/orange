@@ -336,9 +336,6 @@ importers:
 
   packages/database:
     dependencies:
-      '@prisma/client':
-        specifier: ^6.15.0
-        version: 6.15.0(prisma@6.15.0(typescript@5.8.3))(typescript@5.8.3)
       '@types/bcrypt':
         specifier: ^5.0.2
         version: 5.0.2
@@ -358,9 +355,6 @@ importers:
 
   packages/db-client:
     dependencies:
-      '@prisma/client':
-        specifier: ^6.9.0
-        version: 6.9.0(prisma@6.9.0(typescript@5.8.3))(typescript@5.8.3)
       prisma:
         specifier: ^6.9.0
         version: 6.9.0(typescript@5.8.3)
@@ -787,18 +781,6 @@ packages:
 
   '@prisma/client@6.15.0':
     resolution: {integrity: sha512-wR2LXUbOH4cL/WToatI/Y2c7uzni76oNFND7+23ypLllBmIS8e3ZHhO+nud9iXSXKFt1SoM3fTZvHawg63emZw==}
-    engines: {node: '>=18.18'}
-    peerDependencies:
-      prisma: '*'
-      typescript: '>=5.1.0'
-    peerDependenciesMeta:
-      prisma:
-        optional: true
-      typescript:
-        optional: true
-
-  '@prisma/client@6.9.0':
-    resolution: {integrity: sha512-Gg7j1hwy3SgF1KHrh0PZsYvAaykeR0PaxusnLXydehS96voYCGt1U5zVR31NIouYc63hWzidcrir1a7AIyCsNQ==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -4305,11 +4287,6 @@ snapshots:
   '@prisma/client@6.15.0(prisma@6.15.0(typescript@5.8.3))(typescript@5.8.3)':
     optionalDependencies:
       prisma: 6.15.0(typescript@5.8.3)
-      typescript: 5.8.3
-
-  '@prisma/client@6.9.0(prisma@6.9.0(typescript@5.8.3))(typescript@5.8.3)':
-    optionalDependencies:
-      prisma: 6.9.0(typescript@5.8.3)
       typescript: 5.8.3
 
   '@prisma/config@6.15.0':
