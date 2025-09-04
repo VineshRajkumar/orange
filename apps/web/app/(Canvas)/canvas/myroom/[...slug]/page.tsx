@@ -34,7 +34,7 @@ type paramType = {
  * revalidate -> This is called Incremental Static Regeneration (ISR).
  */
 
-export const revalidate = 60 * 60 * 24 * 30; // 30 days since sheet title once created wont change explained above 
+export const revalidate = 2592000; // 30 days since sheet title once created wont change explained above 
 
 async function getSheetTitle(sheetId: string): Promise<string> {
 
