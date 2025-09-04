@@ -28,7 +28,7 @@ export const dynamic = "force-dynamic" //dont call db during build only during r
 
 import Canvas from "@/components/canvas/canvas";
 import { keywords, seo } from "@/components/seo/data";
-import { prismaFrontend } from '@repo/db-client'
+// import { prismaFrontend } from '@repo/db-client'
 import { Metadata } from "next";
 
 
@@ -42,7 +42,7 @@ type paramType = {
 
 
 async function getSheetTitle(sheetId: string): Promise<string> {
-
+    const { prismaFrontend } = await import('@repo/db-client'); 
     const sheetTitle = await prismaFrontend.sheet.findUnique({
         where: {
             id: sheetId
