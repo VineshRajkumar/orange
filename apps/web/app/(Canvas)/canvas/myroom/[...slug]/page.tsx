@@ -24,7 +24,7 @@
  */
 
 export const revalidate = 2592000; // 30 days because sheet title once created wont change explained above 
-export const dynamic = "force-dynamic" //dont call db during build only during runtime 
+// export const dynamic = "force-dynamic" //dont call db during build only during runtime 
 
 import Canvas from "@/components/canvas/canvas";
 import { keywords, seo } from "@/components/seo/data";
@@ -42,7 +42,7 @@ type paramType = {
 
 
 async function getSheetTitle(sheetId: string): Promise<string> {
-    // const { prismaFrontend } = await import('@repo/db-client'); //importing it lazily so that prisma doesnot load first during build and this page remains as dynamic page and this function only runs during request in frontend
+    
     const sheetTitle = await prismaFrontend.sheet.findUnique({
         where: {
             id: sheetId

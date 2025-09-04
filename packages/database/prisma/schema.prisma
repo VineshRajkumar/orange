@@ -6,8 +6,9 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"] //This is necessary because the runtimes used in development and deployment differ
   previewFeatures = ["fullTextSearchPostgres"]
-  output   = "../generated/prisma"  //dont send the prisma related thing to this package nodemodule then apps folder cannot access it 
+  output   = "../generated/prisma"  //NOTE:- generated file is important DONOT REMOVE IT as the web folder with nextjs needs it during deployment -> import prisma client in other files by doing like import { PrismaClient } from '../generated/prisma'
 }
 
 datasource db {

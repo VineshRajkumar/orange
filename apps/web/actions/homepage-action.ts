@@ -5,7 +5,7 @@ import { prismaFrontend } from "@repo/db-client"
 
 
 async function incrementVisitor() {
-  // const { prismaFrontend } = await import("@repo/db-client");
+
   const stat = await prismaFrontend.stat.upsert({
     where: { id: 1 },
     update: { visitors: { increment: 1 } },
@@ -15,13 +15,13 @@ async function incrementVisitor() {
 }
 
 async function getStats() {
-  // const { prismaFrontend } = await import("@repo/db-client");
+
   const stat = await prismaFrontend.stat.findUnique({ where: { id: 1 } })
   return { visitors: stat?.visitors ?? 0, likes: stat?.likes ?? 0 }
 }
 
 async function likePortfolio() {
-  // const { prismaFrontend } = await import("@repo/db-client");
+  
   const stat = await prismaFrontend.stat.update({
     where: { id: 1 },
     data: { likes: { increment: 1 } },
