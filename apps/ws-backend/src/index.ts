@@ -69,5 +69,5 @@ wss.on("error", (error) => {
 });
 
 wss.on('listening',()=>{
-  console.log( `WebSocket server started on ws://localhost:${process.env.WEBSOCKET_PORT}/`);
+  console.log( `WebSocket server started on ${process.env.WEBSOCKET_URL}`);
 })
