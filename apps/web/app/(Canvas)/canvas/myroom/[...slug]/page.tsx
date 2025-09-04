@@ -21,8 +21,9 @@ type paramType = {
  * are present in your db at the time when you deployed/redeployed again so once deploy is 
  * over and user starts using the website and now if he creates a new sheet then every time 
  * when he would open the sheet a db call will go again and again for each time opening of
- * sheet so to avoid this revalidate is used what this will do is during build time this wont 
- * fetch the sheet title but when the user creates the sheet and when he first time opens 
+ * sheet so to avoid this revalidate along with "force-dynamic" is used what 
+ * "force-dynamic" will do is during build time this wont fetch the sheet title and 
+ * what revalidate will do is when the user creates the sheet and when he first time opens 
  * it a db call will go and nextjs will cache the title now and only this cached title will 
  * be served for next 30days (since this time is set in revalidate) once 30days are over then 
  * next time if user open the sheet then again a db call will go and this title will again be 
@@ -34,7 +35,9 @@ type paramType = {
  * revalidate -> This is called Incremental Static Regeneration (ISR).
  */
 
-export const revalidate = 2592000; // 30 days since sheet title once created wont change explained above 
+export const revalidate = 2592000; // 30 days because sheet title once created wont change explained above 
+export const dynamic = "force-dynamic" //dont call db during build only during runtime 
+
 
 async function getSheetTitle(sheetId: string): Promise<string> {
 
