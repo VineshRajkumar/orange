@@ -816,7 +816,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                         toErase.current.push(hoveredOver);
                     }
                 }
-                console.log(toErase.current)
+                // console.log(toErase.current)
             }
 
             if (activeActionRef.current === "laser" && laserStartedRef.current === true) {
@@ -1397,7 +1397,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             if (error.response && error.response.data) {
 
                 const data = error.response.data as ApiError;
-                console.log(data)
+                // console.log(data)
                 toast.error(data?.message || "An error occurred while fetching sheets.");
 
             } else {

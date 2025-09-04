@@ -40,7 +40,7 @@ export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet
         if (error.response && error.response.data) {
 
             const data = error.response.data as ApiError;
-            console.log(data)
+            // console.log(data)
             toast.error(data?.message || "An error occurred while fetching sheets.");
 
         } else {

@@ -344,7 +344,7 @@ function renderText(ctx: CanvasRenderingContext2D, diagram:draw_elementsType) {
 
 //draws a blinking vertical line at the end of the current text - like the cursor in a text editor
 function renderCursor(ctx: CanvasRenderingContext2D, diagram:draw_elementsType) {
-  console.log("rendering cursor")
+  // console.log("rendering cursor")
 
   // 1) Set the font and fontsize to take the width of the font  -> "16px Arial" , "24px Roboto"
   ctx.font = `${diagram.fontSize!}px ${diagram.font!}`; //it tells which font and size to use <-this must be set first before measureText() is called beacuse ->width of the text depends on the font and font size.
@@ -605,25 +605,3 @@ export const renderActiveUsers = (
     ctx.fillText(user.username, textX, textY);
   }
 };
-/*
-export const renderActiveUsers = (
-  ctx: CanvasRenderingContext2D,
-  activeUsers: Map<string, ActiveUser>,
-  diagrams: draw_elementsType[],
-  diagramUserMap: Map<string, string>
-) => {
-  for (const [userId, user] of activeUsers.entries()) {
-    if (Date.now() - user.lastActive > 3000) continue; // skip inactive
-
-    // find the most recent shape for this user
-    const lastShape = [...diagrams].reverse().find(
-      (d) => diagramUserMap.get(d.id) === userId
-    );
-    if (!lastShape) continue;
-
-    ctx.font = "14px Arial";
-    ctx.fillStyle = "black";
-    ctx.fillText(user.username, lastShape.x1! ?? 0, (lastShape.y1 ?? 0) - 10);
-  }
-};
-*/

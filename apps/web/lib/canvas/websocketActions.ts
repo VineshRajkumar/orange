@@ -17,7 +17,7 @@ export const broadcastAction = (
 };
 
 export const performAction = (action: draw_elementsType | draw_elementsType[] , diagrams: draw_elementsType[], removeShape: boolean = false) => {
-  console.log(action)
+  // console.log(action)
   if (removeShape) {
 
     if (!Array.isArray(action)) {

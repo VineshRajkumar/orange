@@ -50,7 +50,7 @@ export function SigninForm() {
       // console.log(err)
       const error = err as AxiosError
       const data = error?.response?.data as ApiError
-      console.log(error)
+      // console.log(error)
       setErrors(data.errors)
       if (errors.length === 0) {
         toast.error(data.message)
