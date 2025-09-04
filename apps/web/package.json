@@ -6,7 +6,7 @@
   "scripts": {
     "_comment": "NOTE :- Removed --turbopack from dev script because of Radix UI issue with pnpm",
     "dev": "next dev --port 3000",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit"
