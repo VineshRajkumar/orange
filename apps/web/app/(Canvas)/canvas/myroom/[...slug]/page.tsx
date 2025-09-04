@@ -12,6 +12,30 @@ type paramType = {
 //since sheet are dynamic so load the sheet title - also this page is server side rendering only canvas component renders client side
 
 
+/***Why revalidate is used here ? 
+ * Ans) Here are few reasons :- 
+ * 
+ * If revalidate was not used then sheet titles will once be fetched during build time 
+ * (when first time website is uploaded or next time when you redeploy) now what will happen 
+ * here is when you deploy/redploy your website this will only cache those titles only that 
+ * are present in your db at the time when you deployed/redeployed again so once deploy is 
+ * over and user starts using the website and now if he creates a new sheet then every time 
+ * when he would open the sheet a db call will go again and again for each time opening of
+ * sheet so to avoid this revalidate is used what this will do is during build time this wont 
+ * fetch the sheet title but when the user creates the sheet and when he first time opens 
+ * it a db call will go and nextjs will cache the title now and only this cached title will 
+ * be served for next 30days (since this time is set in revalidate) once 30days are over then 
+ * next time if user open the sheet then again a db call will go and this title will again be 
+ * cached and next db call will be in next 30days -> so this is one optimization strategy 
+ * -> also this can be used in blog websites too(if new blogs will be added after deployment 
+ * also then use revalidate=60 sec OR if new blogs wont be added and blogs are fixed then 
+ * just ssg(static site generation) during build  ) 
+ * 
+ * revalidate -> This is called Incremental Static Regeneration (ISR).
+ */
+
+export const revalidate = 60 * 60 * 24 * 30; // 30 days since sheet title once created wont change explained above 
+
 async function getSheetTitle(sheetId: string): Promise<string> {
 
     const sheetTitle = await prismaFrontend.sheet.findUnique({
