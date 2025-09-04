@@ -1,4 +1,6 @@
-import { Prisma } from "@prisma/client/extension";
+// import { Prisma } from "@prisma/client/extension";
+
+import { Prisma } from "../../../database/generated/prisma";
 
 // Read about prisma extension i have written in notes
 

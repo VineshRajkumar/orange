@@ -1,4 +1,6 @@
-import { Prisma } from "@prisma/client/extension";
+// import { Prisma } from "@prisma/client/extension";
+
+import { Prisma } from "../../generated/prisma";
 
 
 //NEON DB OFTEN SLEEPS SO SOMETIMES THE DB SERVER MIGHT TAKE TIME TO START 

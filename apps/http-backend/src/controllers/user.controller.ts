@@ -1,5 +1,4 @@
-import { prisma } from "@repo/db";
-import { User } from "@prisma/client";
+import { prisma, User } from "@repo/db";
 import jwt, { SignOptions } from "jsonwebtoken";
 import { ApiError, verifyAccessToken } from "@repo/backend-common";
 import bcrypt from "bcrypt";

@@ -1,4 +1,5 @@
-import { User } from '@prisma/client'
+
+import { User } from "@repo/db";
 import { Request } from "express";
 
 export type SafeUser = Omit<User, 'password' | 'refreshToken'>;
