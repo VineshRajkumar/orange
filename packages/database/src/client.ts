@@ -1,5 +1,6 @@
 
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '../generated/prisma'
 import { bcryptExtension } from "./extensions/bcrypt.extension";
 import { existsExtension } from "./extensions/exists.extension";
 import { retryExtension } from "./extensions/retry.extension";

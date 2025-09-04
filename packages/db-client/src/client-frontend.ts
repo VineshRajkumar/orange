@@ -1,6 +1,7 @@
 //THIS FILE IS NOT THE MAIN FILE THIS FILE IS ONLY FOR FRONTEND TO USE WHILE SERVER SIDE RENDERING AS BCRYPT DOESNOT SUPPORT IN FRONTEND (bcrypt requires a native build which isn’t being found in my environment (Windows + Node 20).) 
 
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '../../database/generated/prisma'
 import { existsExtension } from "./extensions/exists.extension";
 import { retryExtension } from "./extensions/retry.extension";
 
