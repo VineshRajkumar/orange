@@ -7,9 +7,9 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const app  = express()
-
+//process.env.CORS_ORIGIN
 app.use(cors({
-    origin: process.env.CORS_ORIGIN, //so that only frontend can access backend -> security
+    origin: ['https://orangeboard.vercel.app/','http://localhost:3000','https://orangeboard.vercel.app'], //so that only frontend can access backend -> security
     credentials:true, //allows server to accept cookies,headers,client certificates etc
     methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], //needed for nextjs frontend
     allowedHeaders: ['Content-Type','Authorization'], //needed for nextjs frontend
