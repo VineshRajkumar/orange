@@ -204,6 +204,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     const laserStartedRef = useRef<boolean>(false)
 
     //------------------------------------
+    //for mobile users -> text  
+    const hiddenInputRef = useRef<HTMLInputElement>(null)
+
+    //------------------------------------
     //active users currently drawing/rendering draws <- WebSocket related
     const activeUsersRef = useRef<Map<string, { username: string; lastActive: number }>>(new Map());
     const diagramUserMapRef = useRef<Map<string, string>>(new Map());
@@ -540,6 +544,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             if (activeActionRef.current === "edit") {
                 if (selectedDraw.current && selectedDraw.current.type === "text") {
 
+                    //for mobile -  In edit mode, when selecting text open keywboard
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.value = selectedDraw.current.text || "";
+                        hiddenInputRef.current.focus();   
+                    }
+
                     //1. Push edited text back to canvas:
                     if (!socket) diagrams.current.push(selectedDraw.current);
 
@@ -584,6 +594,13 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 //WEBSCOKET - Broadcast text
                 if (activeDraw.current && activeDraw.current.type === "text") {
+
+                    //for mobile - In draw mode, when starting text open keywboard
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.value = textInp.current || "";
+                        hiddenInputRef.current.focus();  
+                    }                    
+
                     diagrams.current.push(activeDraw.current);
                     if (!isLoading) {
                         if (socket.current) {
@@ -649,6 +666,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 laserStartedRef.current = true;
             }
 
+            
 
         }
 
@@ -983,6 +1001,13 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 //2) If first click then let the user type , on second click anywhere on the canvas save the text
                 if (activeDraw.current.type === "text") {
+
+                    //for mobile - if text then open the keyboard
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.value = textInp.current || "";
+                        hiddenInputRef.current.focus();   
+                    }
+
                     if (editCounterRef.current < 1) {
                         editCounterRef.current++;
                         return
@@ -1120,6 +1145,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 event.preventDefault();
 
                 if (event.key === "Enter") {
+
+                    //for mobile
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.blur();
+                    }
+
                     diagrams.current.push(activeDraw.current!);
 
                     //socket
@@ -1142,6 +1173,11 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                     activeDraw.current = null;
                 }
                 else if (event.key === "Escape") {
+                    //for mobile
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.blur();
+                    }
+                    
                     textInp.current = "";
                     activeDraw.current = null;
                 }
@@ -1175,6 +1211,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 event.preventDefault();
 
                 if (event.key === "Enter") {
+
+                    //for mobile
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.blur();
+                    }
+
                     diagrams.current.push(selectedDraw.current!);
 
 
@@ -1202,6 +1244,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 }
                 else if (event.key === "Escape") {
+                    //for mobile
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.blur();
+                    }
                     textInp.current = "";
                     selectedDraw.current = null;
                     setSelectedShape(null);
@@ -3014,6 +3060,9 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                     changeActiveLineWidth={changeActiveLineWidth}
                     changeActiveFillStyle={changeActiveFillStyle}
                     activeFillStyle={activeFillStyle}
+                    selectedDraw={selectedDraw}
+                    textInp={textInp}
+                    hiddenInputRef={hiddenInputRef}
                 />
 
 

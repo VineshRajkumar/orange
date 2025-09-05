@@ -57,11 +57,14 @@ interface Props {
     changeActiveLineWidth: (width: number) => void
     changeActiveFillStyle: (color: string) => void
     activeFillStyle: string
+    selectedDraw:React.RefObject<draw_elementsType | null>
+    textInp: React.RefObject<string>
+    hiddenInputRef: React.RefObject<HTMLInputElement | null>
 
 
 }
 
-const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectionBox, activeShape, setActiveShape, isDragging, selectedShape, darkMode, changeActiveStrokeStyle, activeStrokeColor, changeActiveFont, changeActiveFontSize, activeFontSize, activeFont, activestrokeWidth, changeActiveLineWidth, changeActiveFillStyle, activeFillStyle }: Props) => {
+const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectionBox, activeShape, setActiveShape, isDragging, selectedShape, darkMode, changeActiveStrokeStyle, activeStrokeColor, changeActiveFont, changeActiveFontSize, activeFontSize, activeFont, activestrokeWidth, changeActiveLineWidth, changeActiveFillStyle, activeFillStyle,selectedDraw,textInp,hiddenInputRef }: Props) => {
 
     const strokeColors = darkMode
         ? ["#ffffff", "#ff4d4f", "#00c853", "#40c4ff", "#ffd600", "#b388ff"]
@@ -742,6 +745,29 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                 ) : (
                     <></>
                 )}
+
+            {/* Hidden input to trigger mobile keyboard */}
+            <input
+                ref={hiddenInputRef}
+                type="text"
+                style={{
+                position: "absolute",
+                opacity: 0,
+                pointerEvents: "none",
+                height: 0,
+                }}
+                onChange={(e) => {
+                if (activeDraw.current?.type === "text") {
+                    activeDraw.current.text = e.target.value;
+                    textInp.current = e.target.value;
+                }
+                if (selectedDraw.current?.type === "text") {
+                    selectedDraw.current.text = e.target.value;
+                    textInp.current = e.target.value;
+                }
+                }}
+            />
+            
         </div>
     )
 }
