@@ -13,6 +13,7 @@ import {
 } from "@repo/zodschemas";
 import { zodErrorFormat } from "@repo/zodschemas";
 import { generateRandomUsername } from "../utils/guestUtils";
+import { CookieOptions } from "express";
 
 //NOTE :- bcryptExtension,existsExtension has been made in pacakages/database
 
@@ -253,10 +254,11 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
   
   const expiryInMillisec = expiry * 1000  //converting expiry of jwt in sec to millisec 
 
-  const options = {
+  const options: CookieOptions = {
     httpOnly: true, //for security purposes by using httpOnly cookies will only be mofiable through server cannot mondify through frontend
     secure: true,
-    maxAge: expiryInMillisec //after 1day it will be cleared in browser too -> user allowed only for 1day
+    maxAge: expiryInMillisec, //after 1day it will be cleared in browser too -> user allowed only for 1day
+    sameSite: "none"     // REQUIRED for cross-site cookies
   }
 
   return res
@@ -333,10 +335,11 @@ const loginGuestUser: RequestHandler = asyncHandler(async (req , res) => {
 
     const expiryInMillisec = expiry * 1000  //converting expiry of jwt in sec to millisec 
 
-    const options = {
+    const options: CookieOptions = {
         httpOnly: true, //for security purposes by using httpOnly cookies will only be mofiable through server cannot mondify through frontend
         secure: true,
-        maxAge: expiryInMillisec //after 2hr it will be cleared in browser too -> guest allowed only for 2hrs 
+        maxAge: expiryInMillisec, //after 2hr it will be cleared in browser too -> guest allowed only for 2hrs 
+        sameSite: "none",     // REQUIRED for cross-site cookies
     };
 
     return res
@@ -385,9 +388,10 @@ const logoutUser: RequestHandler = asyncHandler(async (req, res) => {
   }
 
   //remove cookies
-  const options = {
+  const options:CookieOptions = {
     httpOnly: true, //for security purposes by using httpOnly cookies will only be mofiable through server cannot mondify through frontend
     secure: true,
+    sameSite: "none",     // REQUIRED for cross-site cookies
   };
 
   let response = res.status(200).clearCookie("accessToken", options);
@@ -457,10 +461,11 @@ const refreshAccessToken: RequestHandler = asyncHandler(async (req, res) => {
         
         const expiryInMillisec = expiry * 1000  //converting expiry of jwt in sec to millisec 
 
-        const options = {
+        const options:CookieOptions = {
             httpOnly: true, //for security purposes by using httpOnly cookies will only be mofiable through server cannot mondify through frontend
             secure: true,
-            maxAge: expiryInMillisec //after 1day it will be cleared in browser too -> user allowed only for 1day
+            maxAge: expiryInMillisec, //after 1day it will be cleared in browser too -> user allowed only for 1day
+            sameSite: "none",     // REQUIRED for cross-site cookies
         }
 
 
