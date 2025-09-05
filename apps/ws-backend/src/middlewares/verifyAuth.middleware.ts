@@ -1,6 +1,6 @@
 import { ApiError, verifyAccessToken } from '@repo/backend-common';
 import { IncomingMessage } from 'http'
-import { prisma } from '@repo/db';
+import { prisma } from '@repo/database';
 import { AuthedSocket } from '../types/auth.type';
 import { roomManager } from '../utils/roomManager';
 import { ApiResponse } from '../utils/ApiResponse';

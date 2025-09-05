@@ -18,7 +18,7 @@
   },
   "devDependencies": {
     "@repo/backend-common": "workspace:*",
-    "@repo/db": "workspace:*",
+    "@repo/database": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/zodschemas": "workspace:*",
     "@types/ws": "^8.18.1",

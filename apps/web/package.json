@@ -5,6 +5,9 @@
   "private": true,
   "scripts": {
     "_comment": "NOTE :- Removed --turbopack from dev script because of Radix UI issue with pnpm",
+    "_comment2": "NOTE :- NEVER EVER RUN pnpm run dev BY NAVIGATING TO /apps/web folder turborepo works differnt so from the root run -> pnpm turbo run dev --filter=web",
+    "_comment3": "VVIMP :- NO pnpn run dev ",
+    "_comment4": "VVIMP :- DO pnpm turbo run dev --filter=web FROM ROOT OF PROJECT ",
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
@@ -34,6 +37,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@repo/backend-common": "workspace:*",
     "@repo/db-client": "workspace:*",
+    "@repo/database": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/zodschemas": "workspace:*",
     "@tabler/icons-react": "^3.34.0",

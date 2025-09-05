@@ -23,7 +23,10 @@ const ALLOWED_ORIGINS = new Set([
 const corsOptions: cors.CorsOptions = {
   origin(origin, cb) {
     // allow SSR/no-origin, and explicit whitelisted origins
-    if (!origin || ALLOWED_ORIGINS.has(origin)) return cb(null, true);
+    if (!origin || ALLOWED_ORIGINS.has(origin)) {
+        console.log('allowed origin comes', origin)
+        return cb(null, true);
+    }
     return cb(null, false);
   },
   credentials: true,
@@ -38,7 +41,7 @@ app.use(cors(corsOptions));
 // and OPTIONS handler means backend server giving that permission
 // * here means to match this cors thing to all routes in express
 // app.options('*', cors());
-app.options('*', cors(corsOptions));
+app.options('/{*any}', cors(corsOptions));
 
 //these are for parsing so that when data comes express doesnot face any problem
 app.use(express.json({limit:"16kb"})) //json file limit -  Middleware to parse JSON request bodies

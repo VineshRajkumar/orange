@@ -5,7 +5,7 @@
 import { ApiError } from "@repo/backend-common";
 import { wsAsyncHandler } from "../utils/asyncHandler";
 import jwt , { JwtPayload } from "jsonwebtoken"
-import { prisma } from "@repo/db";
+import { prisma } from "@repo/database";
 import { ApiResponse } from "../utils/ApiResponse";
 
 interface ticketType extends JwtPayload {

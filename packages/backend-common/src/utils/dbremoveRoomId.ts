@@ -1,5 +1,5 @@
 import { ApiError } from "@repo/backend-common"
-import { prisma } from "@repo/db"
+import { prisma } from "@repo/database"
 
 export const dbremoveRoomId = async (userId: string) => {
     if(!userId){

@@ -24,7 +24,7 @@
     "zod": "^3.25.64"
   },
   "devDependencies": {
-    "@repo/db": "workspace:*",
+    "@repo/database": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@repo/backend-common": "workspace:*",
     "@repo/zodschemas": "workspace:*",

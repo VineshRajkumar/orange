@@ -2,7 +2,7 @@ import { RequestHandler } from "express-serve-static-core";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ApiError } from "@repo/backend-common";
 import { v4 as uuidv4 } from 'uuid';
-import {  prisma } from "@repo/db"
+import {  prisma } from "@repo/database"
 import { ApiResponse } from "../utils/ApiResponse";
 import * as sheetService from "../services/sheet.services";
 import jwt, { SignOptions } from "jsonwebtoken"

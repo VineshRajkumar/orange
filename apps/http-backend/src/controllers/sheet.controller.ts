@@ -2,7 +2,7 @@ import { RequestHandler } from "express-serve-static-core"
 import { asyncHandler } from "../utils/asyncHandler"
 import { ApiError } from "@repo/backend-common";
 import { zodErrorFormat , saveSheetDataSchema  } from "@repo/zodschemas";
-import { prisma } from "@repo/db";
+import { prisma } from "@repo/database";
 import * as sheetService from "../services/sheet.services";
 import { ApiResponse } from "../utils/ApiResponse";
 

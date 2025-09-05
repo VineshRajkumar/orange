@@ -6,7 +6,7 @@ import { Prisma } from "../../generated/prisma";
 
 // NOTE :- YOU CANNOT MOVE Prisma.defineExtension to app/http-backend 
 // beacuse it will give error as You're importing Prisma from a generated
-// Prisma client (@repo/db) since prisma is alredy generated you cannot 
+// Prisma client (@repo/database) since prisma is alredy generated you cannot 
 // do extends or modify the prisma folder thats why it gives error.
 //  Hence extensions folder should be in packages/database so that 
 // before being generated the extensions can modify the Prisma.

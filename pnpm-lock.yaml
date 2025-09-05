@@ -60,7 +60,7 @@ importers:
       '@repo/backend-common':
         specifier: workspace:*
         version: link:../../packages/backend-common
-      '@repo/db':
+      '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
       '@repo/typescript-config':
@@ -150,6 +150,9 @@ importers:
       '@repo/backend-common':
         specifier: workspace:*
         version: link:../../packages/backend-common
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@repo/db-client':
         specifier: workspace:*
         version: link:../../packages/db-client
@@ -281,7 +284,7 @@ importers:
       '@repo/backend-common':
         specifier: workspace:*
         version: link:../../packages/backend-common
-      '@repo/db':
+      '@repo/database':
         specifier: workspace:*
         version: link:../../packages/database
       '@repo/typescript-config':
@@ -312,7 +315,7 @@ importers:
         specifier: ^9.0.2
         version: 9.0.2
     devDependencies:
-      '@repo/db':
+      '@repo/database':
         specifier: workspace:*
         version: link:../database
       '@repo/typescript-config':
