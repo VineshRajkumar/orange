@@ -435,6 +435,17 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             };
         };
 
+        //making canvas suitable for mobile versions 
+        const getTouchPosition = (touch: Touch, canvas: HTMLCanvasElement) => {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                offsetX: (touch.clientX - rect.left - panOffset.current.x) / scale.current,
+                offsetY: (touch.clientY - rect.top - panOffset.current.y) / scale.current,
+                rawX: touch.clientX - rect.left,
+                rawY: touch.clientY - rect.top,
+            };
+        };
+
 
         function handleMouseDown(event: MouseEvent) {
             setIsDragging(true);
@@ -1053,6 +1064,51 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
         }
 
+
+        //making canvas suitable for mobile versions -> similarly to handleMouseDown -> if touched then send the coordinates to handleMouseDown
+        function handleTouchStart(event: TouchEvent) {
+
+            if (!canvasRef.current) return;
+            const touch = event.touches[0];
+            if (!touch) return;
+
+            const { rawX, rawY } = getTouchPosition(touch, canvasRef.current);
+            handleMouseDown({
+                offsetX: rawX,
+                offsetY: rawY,
+            } as unknown as MouseEvent);
+
+            event.preventDefault();
+        }
+
+        //making canvas suitable for mobile versions -> similarly to handleMouseMove -> if moved then send the coordinates to handleMouseMove
+        function handleTouchMove(event: TouchEvent) {
+            if (!canvasRef.current) return;
+            const touch = event.touches[0];
+            if (!touch) return;
+
+            const { rawX, rawY } = getTouchPosition(touch, canvasRef.current);
+            handleMouseMove({
+                offsetX: rawX,
+                offsetY: rawY,
+            } as unknown as MouseEvent);
+
+            event.preventDefault();
+        }
+
+        //making canvas suitable for mobile versions -> similarly to handleMouseUp -> if touch ends then send the coordinates to handleMouseUp
+        function handleTouchEnd(event: TouchEvent) {
+            if (!canvasRef.current) return;
+
+            // use last known position if needed
+            handleMouseUp({
+                offsetX: currentX.current ?? 0,
+                offsetY: currentY.current ?? 0,
+            } as unknown as MouseEvent);
+
+            event.preventDefault();
+        }
+
         //DIDNOT CHECK A LOT 
         const handleKeyDown = (event: KeyboardEvent) => {
             if (activeActionRef.current === "select") {
@@ -1192,6 +1248,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
         canvasCurrent?.addEventListener("mousedown", handleMouseDown);
         canvasCurrent?.addEventListener("mousemove", handleMouseMove);
         canvasCurrent?.addEventListener("mouseup", handleMouseUp);
+
+        //for moible users
+        canvasCurrent?.addEventListener("touchstart", handleTouchStart, { passive: false });
+        canvasCurrent?.addEventListener("touchmove", handleTouchMove, { passive: false });
+        canvasCurrent?.addEventListener("touchend", handleTouchEnd, { passive: false });
+
         canvasCurrent.addEventListener("keydown", handleKeyDown);
         canvasCurrent.addEventListener("wheel", handleScroll);
 
@@ -1200,6 +1262,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             canvasCurrent?.removeEventListener("mousedown", handleMouseDown);
             canvasCurrent?.removeEventListener("mousemove", handleMouseMove);
             canvasCurrent?.removeEventListener("mouseup", handleMouseUp);
+
+            //mobile
+            canvasCurrent?.removeEventListener("touchstart", handleTouchStart);
+            canvasCurrent?.removeEventListener("touchmove", handleTouchMove);
+            canvasCurrent?.removeEventListener("touchend", handleTouchEnd);
+
             canvasCurrent.removeEventListener("keydown", handleKeyDown);
             canvasCurrent.removeEventListener("wheel", handleScroll);
         };
@@ -2102,7 +2170,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                                                             </li>
                                                             <li>
                                                                 <span className="font-medium">Sharing links:</span> A sheet or room
-                                                                link can be shared with anyone. They dont need an account. They will be 
+                                                                link can be shared with anyone. They dont need an account. They will be
                                                                 logged in as guests automatically.
                                                             </li>
                                                             <li>
