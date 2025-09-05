@@ -12,14 +12,14 @@ const nextConfig = {
     return config;
   },
 
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*', // any request to /api/* on your frontend
-        destination: 'https://orange-http-backend.vercel.app/api/:path*', // sends request to url/api/* backend -> since my  backend urls will have url/api/v1/user/login 
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/:path*', // any request to /api/* on your frontend
+  //       destination: 'https://orange-http-backend.vercel.app/api/:path*', // sends request to url/api/* backend -> since my  backend urls will have url/api/v1/user/login 
+  //     },
+  //   ];
+  // },
 
 };
 
