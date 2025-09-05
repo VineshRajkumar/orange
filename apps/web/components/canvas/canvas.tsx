@@ -470,7 +470,6 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 const hoveredSelectionBox = hoverOverSelectionBox(shapeSelectionBox.current!, offsetX, offsetY);
 
                 //2. If user clicked on a shape (not a resize handle):
-                //CHECK IF ANY ERROR IN SELECTION USE ! IF NOT WORKING
                 if (!hoveredSelectionBox && draw) {
                     if (!draw.fillStyle || !draw.strokeColor || !draw.strokeWidth) return
                     setActiveFillStyle(draw?.fillStyle);
@@ -544,10 +543,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             if (activeActionRef.current === "edit") {
                 if (selectedDraw.current && selectedDraw.current.type === "text") {
 
-                    //for mobile -  In edit mode, when selecting text open keywboard
+                    //for mobile - In draw mode, when starting text open keywboard
                     if (hiddenInputRef.current) {
-                        hiddenInputRef.current.value = selectedDraw.current.text || "";
-                        hiddenInputRef.current.focus();   
+                        hiddenInputRef.current.value = textInp.current || "";
+                        setTimeout(() => hiddenInputRef.current?.focus(), 10);
                     }
 
                     //1. Push edited text back to canvas:
@@ -594,12 +593,6 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 //WEBSCOKET - Broadcast text
                 if (activeDraw.current && activeDraw.current.type === "text") {
-
-                    //for mobile - In draw mode, when starting text open keywboard
-                    if (hiddenInputRef.current) {
-                        hiddenInputRef.current.value = textInp.current || "";
-                        hiddenInputRef.current.focus();  
-                    }                    
 
                     diagrams.current.push(activeDraw.current);
                     if (!isLoading) {
@@ -658,6 +651,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                     shapeSelectionBox.current = handleShapeSelectionBox(activeDraw.current!, ctx)
 
+                    //for mobile - In draw mode, when starting text open keywboard
+                    if (hiddenInputRef.current) {
+                        hiddenInputRef.current.value = textInp.current || "";
+                        setTimeout(() => hiddenInputRef.current?.focus(), 10);
+                    }
+
                 }
 
             }
@@ -666,7 +665,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 laserStartedRef.current = true;
             }
 
-            
+
 
         }
 
@@ -970,6 +969,11 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                         );
                         canvasCurrent.style.cursor = "text";
                         editCounterRef.current = 0;
+
+                        if (hiddenInputRef.current) {
+                            hiddenInputRef.current.value = selectedDraw.current?.text || "";
+                            setTimeout(() => hiddenInputRef.current?.focus(), 10);
+                        }
                     }
                     return;
                 }
@@ -1002,12 +1006,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 //2) If first click then let the user type , on second click anywhere on the canvas save the text
                 if (activeDraw.current.type === "text") {
 
-                    //for mobile - if text then open the keyboard
-                    if (hiddenInputRef.current) {
-                        hiddenInputRef.current.value = textInp.current || "";
-                        hiddenInputRef.current.focus();   
-                    }
-
+                
                     if (editCounterRef.current < 1) {
                         editCounterRef.current++;
                         return
@@ -1177,7 +1176,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                     if (hiddenInputRef.current) {
                         hiddenInputRef.current.blur();
                     }
-                    
+
                     textInp.current = "";
                     activeDraw.current = null;
                 }

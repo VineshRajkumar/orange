@@ -57,14 +57,14 @@ interface Props {
     changeActiveLineWidth: (width: number) => void
     changeActiveFillStyle: (color: string) => void
     activeFillStyle: string
-    selectedDraw:React.RefObject<draw_elementsType | null>
+    selectedDraw: React.RefObject<draw_elementsType | null>
     textInp: React.RefObject<string>
     hiddenInputRef: React.RefObject<HTMLInputElement | null>
 
 
 }
 
-const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectionBox, activeShape, setActiveShape, isDragging, selectedShape, darkMode, changeActiveStrokeStyle, activeStrokeColor, changeActiveFont, changeActiveFontSize, activeFontSize, activeFont, activestrokeWidth, changeActiveLineWidth, changeActiveFillStyle, activeFillStyle,selectedDraw,textInp,hiddenInputRef }: Props) => {
+const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectionBox, activeShape, setActiveShape, isDragging, selectedShape, darkMode, changeActiveStrokeStyle, activeStrokeColor, changeActiveFont, changeActiveFontSize, activeFontSize, activeFont, activestrokeWidth, changeActiveLineWidth, changeActiveFillStyle, activeFillStyle, selectedDraw, textInp, hiddenInputRef }: Props) => {
 
     const strokeColors = darkMode
         ? ["#ffffff", "#ff4d4f", "#00c853", "#40c4ff", "#ffd600", "#b388ff"]
@@ -750,24 +750,29 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
             <input
                 ref={hiddenInputRef}
                 type="text"
+                inputMode="text"
+                autoComplete="off"
+                autoCorrect="on"
                 style={{
-                position: "absolute",
-                opacity: 0,
-                pointerEvents: "none",
-                height: 0,
+                    position: "absolute",
+                    left: -9999,      // offscreen but focusable
+                    width: 1,
+                    height: 1,
+                    opacity: 0.01,    // tiny visibility so mobile reliably opens keyboard
+                    caretColor: "transparent", // optional
                 }}
                 onChange={(e) => {
-                if (activeDraw.current?.type === "text") {
-                    activeDraw.current.text = e.target.value;
-                    textInp.current = e.target.value;
-                }
-                if (selectedDraw.current?.type === "text") {
-                    selectedDraw.current.text = e.target.value;
-                    textInp.current = e.target.value;
-                }
+                    const v = e.target.value;
+                    textInp.current = v;
+                    if (activeDraw.current?.type === "text") {
+                        activeDraw.current.text = v;
+                    }
+                    if (selectedDraw.current?.type === "text") {
+                        selectedDraw.current.text = v;
+                    }
                 }}
             />
-            
+
         </div>
     )
 }
