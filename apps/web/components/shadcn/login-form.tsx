@@ -48,7 +48,7 @@ export function LoginForm() {
 
 
     try {
-      const response = await axios.post(`/users/login`, data) as AxiosResponse
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users/login`, data) as AxiosResponse
       const res = response.data as ApiResponse
       const userdata = (res.data as { user: userType }).user;
      
