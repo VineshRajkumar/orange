@@ -543,10 +543,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             if (activeActionRef.current === "edit") {
                 if (selectedDraw.current && selectedDraw.current.type === "text") {
 
-                    //for mobile - In draw mode, when starting text open keywboard
+                    //for mobile - In EDIT mode, when starting text open keywboard
                     if (hiddenInputRef.current) {
                         hiddenInputRef.current.value = textInp.current || "";
-                        setTimeout(() => hiddenInputRef.current?.focus(), 10);
+                        setTimeout(() => hiddenInputRef.current?.focus(), 20);
                     }
 
                     //1. Push edited text back to canvas:
@@ -651,10 +651,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                     shapeSelectionBox.current = handleShapeSelectionBox(activeDraw.current!, ctx)
 
-                    //for mobile - In draw mode, when starting text open keywboard
+                    //for mobile - In draw mode, when starting text open keyboard also
                     if (hiddenInputRef.current) {
                         hiddenInputRef.current.value = textInp.current || "";
-                        setTimeout(() => hiddenInputRef.current?.focus(), 10);
+                        setTimeout(() => hiddenInputRef.current?.focus(), 20);
                     }
 
                 }
@@ -1008,6 +1008,13 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 
                     if (editCounterRef.current < 1) {
+
+                        //for mobile - In draw mode, when starting text since this is first click so open keyboard also
+                        if (hiddenInputRef.current) {
+                            hiddenInputRef.current.value = textInp.current || "";
+                            setTimeout(() => hiddenInputRef.current?.focus(), 20);
+                        }
+
                         editCounterRef.current++;
                         return
                     }
