@@ -7,19 +7,38 @@ import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 
 const app  = express()
-//process.env.CORS_ORIGIN
-app.use(cors({
-    origin: ['https://orangeboard.vercel.app/','http://localhost:3000','https://orangeboard.vercel.app'], //so that only frontend can access backend -> security
-    credentials:true, //allows server to accept cookies,headers,client certificates etc
-    methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], //needed for nextjs frontend
-    allowedHeaders: ['Content-Type','Authorization'], //needed for nextjs frontend
-}))
+
+// app.use(cors({
+//     origin: process.env.CORS_ORIGIN, //so that only frontend can access backend -> security
+//     credentials:true, //allows server to accept cookies,headers,client certificates etc
+//     methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], //needed for nextjs frontend
+//     allowedHeaders: ['Content-Type','Authorization'], //needed for nextjs frontend
+// }))
+
+const ALLOWED_ORIGINS = new Set([
+  'https://orangeboard.vercel.app',
+  'http://localhost:3000',
+]);
+
+const corsOptions: cors.CorsOptions = {
+  origin(origin, cb) {
+    // allow SSR/no-origin, and explicit whitelisted origins
+    if (!origin || ALLOWED_ORIGINS.has(origin)) return cb(null, true);
+    return cb(null, false);
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  // ❌ Do NOT pin allowedHeaders; let the cors package reflect the request headers.
+  // allowedHeaders: undefined
+};
+app.use(cors(corsOptions));
 
 // handle preflight OPTIONS requests for nextjs frontend 
 // Preflight means browser asking permission first to the backend 
 // and OPTIONS handler means backend server giving that permission
 // * here means to match this cors thing to all routes in express
-app.options('*', cors());
+// app.options('*', cors());
+app.options('*', cors(corsOptions));
 
 //these are for parsing so that when data comes express doesnot face any problem
 app.use(express.json({limit:"16kb"})) //json file limit -  Middleware to parse JSON request bodies
