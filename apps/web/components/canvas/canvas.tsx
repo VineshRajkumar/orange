@@ -59,7 +59,7 @@ import { loadSheetWithSheetId } from "@/actions/loadSheet.action";
 import { joinToRoom } from "@/actions/joinRoom.action";
 import { useSingleSheetTab } from "@/hooks/use-single-sheet-tab";
 import { InfoTooltip } from "../mycomponents/info-tooltip";
-import { areCookiesEnabled } from "@/actions/cookieAllowed.action";
+import { useAuthValidator } from "@/hooks/use-auth-validator";
 
 
 
@@ -119,7 +119,9 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     // Custom hook to manage that owner doesnot open the same sheet in another tab 
     useSingleSheetTab(sheetId, sheetData?.[sheetId]?.ownerId === userData?.id, 'This sheet is open in another tab. Closing this sheet...')
 
-
+    //-------------------------------------
+    //Custom hook to check if browser supports cookie storage if not then after 5sec this will log him out 
+    useAuthValidator()
 
 
     // ------------------------------------------------------------------------
@@ -231,6 +233,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
 
     //------------------------------------
+
 
     //websocket messages + guest/user session expiry message 
     useEffect(() => {
@@ -1767,10 +1770,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                     // b) no roomId then that means share sheet
                     // localStorage.setItem("originalUser", "false")
 
-                    if (!areCookiesEnabled()) {
-                        toast.error("Your browser does not allow cookies. You cannot join a session.");
-                        return; 
-                    }
+                    // if (!areCookiesEnabled()) {
+                    //     toast.error("Your browser does not allow cookies. You cannot join a session.");
+                    //     return; 
+                    // }
 
                     if (roomId && !shareSheetAllowed) {
                         await handleUnAuthorizedUsers("session");
@@ -1785,10 +1788,10 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 console.log("Error while checking access token:", err);
                 // localStorage.setItem("originalUser", "false")
 
-                if (!areCookiesEnabled()) {
-                    toast.error("Your browser does not allow cookies. You cannot join a session.");
-                    return; 
-                }
+                // if (!areCookiesEnabled()) {
+                //     toast.error("Your browser does not allow cookies. You cannot join a session.");
+                //     return; 
+                // }
 
                 if (roomId && !shareSheetAllowed) {
                     await handleUnAuthorizedUsers("session");

@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Link from "next/link"
-import { useEffect, useState, useTransition } from "react"
+import { useState, useTransition } from "react"
 import { useRouter } from "next/navigation"
 import { AxiosError, AxiosResponse } from "axios"
 import axios from '@/lib/axios'
@@ -22,12 +22,11 @@ import { useNavigateToDashboard } from "@/hooks/use-navigate-dashboard"
 import { ApiResponse } from "@/types/responses.type"
 import { loginErrorMsg } from "@/types/responses.type"
 import { userType } from "@/types/user.type"
-import { areCookiesEnabled } from "@/actions/cookieAllowed.action"
+
 
 export function LoginForm() {
 
   const [errors, setErrors] = useState<Record<string, string>[] | string[]>([])
-  const [cookiesAllowed, setCookiesAllowed] = useState(true)
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const { status, login } = useAuthStore((state) => (state))
@@ -36,18 +35,12 @@ export function LoginForm() {
   //custom hook to redirect to dashboard if status is true
   useNavigateToDashboard({status,router})
 
-  useEffect(() => {
-    setCookiesAllowed(areCookiesEnabled())
-  }, [])
+
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 
     e.preventDefault()
-    if (!cookiesAllowed) {
-      toast.error("Login not possible: your browser has cookies disabled.")
-      return
-    }
-
+   
     const formData = new FormData(e.currentTarget)
 
     const data = {
@@ -108,11 +101,7 @@ export function LoginForm() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {!cookiesAllowed && (
-              <div className="mb-4 rounded-md bg-red-100 text-red-700 p-2 text-sm text-center">
-                ⚠️ Cookies are disabled in your browser. Login will not work properly.
-              </div>
-            )}
+            
             <form onSubmit={handleSubmit} className="grid gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email" className="text-gray-900 dark:text-white">Email</Label>
