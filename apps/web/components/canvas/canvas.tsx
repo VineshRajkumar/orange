@@ -121,7 +121,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
     //-------------------------------------
     //Custom hook to check if browser supports cookie storage if not then after 5sec this will log him out 
-    useAuthValidator()
+    useAuthValidator('canvas')
 
 
     // ------------------------------------------------------------------------
@@ -249,9 +249,9 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     //For fetching sheets from zustand sheets and rendering it also checks if user is logged in or not
     useEffect(() => {
 
-        if (!status) {
-            router.replace("/login");
-        }
+        // if (!status) {
+        //     router.replace("/login");
+        // }
 
         // waiting until data loads
         if (!sheetId || !sheetData || !sheetData[sheetId]) {

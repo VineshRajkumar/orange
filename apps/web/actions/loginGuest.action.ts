@@ -22,6 +22,8 @@ export const loginAsGuest = async({login,setGuestLoader,setSuccess, setError,typ
     try {
         if(setGuestLoader) setGuestLoader(true);
 
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+
         const response = await axios.post("/users/login-guest") as AxiosResponse;
 
         const res = response.data as ApiResponse;

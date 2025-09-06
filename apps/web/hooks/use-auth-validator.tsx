@@ -7,7 +7,7 @@ import { ApiResponse } from "@/types/responses.type";
 import { ApiError } from "@repo/backend-common";
 import { useRouter } from "next/navigation";
 
-export function useAuthValidator() {
+export function useAuthValidator(type:'canvas'|'notcanvas') {
 
   const logout = useAuthStore((state) => state.logout);
   const router = useRouter()
@@ -22,8 +22,9 @@ export function useAuthValidator() {
         // hit backend to check if session cookie is valid
         // if res.success is false or if data not received then throw error that Login session expired or cookies not set and clear data from zustand 
         // if loggedin user only then no issue continue 
-       
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        
+        if(type === 'canvas') await new Promise((resolve) => setTimeout(resolve, 14000));
+        else await new Promise((resolve) => setTimeout(resolve, 3000));
 
         const response = await axios.get("/users/current-user") as AxiosResponse
         const res = response.data as ApiResponse

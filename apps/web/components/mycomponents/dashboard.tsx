@@ -10,7 +10,7 @@ const Dashboard = () => {
     const isMobile = useIsMobile()
     //-------------------------------------
     //Custom hook to check if browser supports cookie storage if not then after 5sec this will log him out -> login not allowed by incognito 
-    useAuthValidator()
+    useAuthValidator('notcanvas')
 
     return (
 
