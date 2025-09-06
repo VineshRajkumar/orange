@@ -16,7 +16,7 @@ interface JoinRoomProps {
     updateRoomId: (roomId: string) => void
     setUrl?: (value: React.SetStateAction<string>) => void
     setOpen?: (value: React.SetStateAction<boolean>) => void
-    router?: AppRouterInstance
+    router: AppRouterInstance
     type: 'userFromLink' | 'userFromDashboard'
     message?: string;
     
@@ -68,10 +68,11 @@ export const joinToRoom = async ({url,setAlertMessage,setShowAlert,setJoinRoomLo
             setShowAlert?.(false);
             setOpen?.(false);
 
-            setTimeout(() => {
-                router?.push(`/canvas/myroom/${sheetId}/${roomId}`);
-            }, 2500);
         }
+
+        setTimeout(() => {
+            router.replace(`/canvas/myroom/${sheetId}/${roomId}`);
+        }, 2500);
         
 
     } catch (err) {

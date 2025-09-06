@@ -31,6 +31,10 @@ export default function PrivacyPolicyPage() {
         <p className="mb-4">
           We only use essential cookies to manage your login session, such as access and refresh tokens. These cookies are necessary for secure authentication and are not used for tracking or advertising.
         </p>
+        <p className="mb-4">
+          Please note: since Orange Board relies on cookies for login, the app may not work properly in
+          <strong> Incognito/Private Browsing mode</strong> or in browsers where cookies are blocked or disabled.
+        </p>
 
         <h2 className="text-xl font-semibold mt-8 mb-2">3. Analytics</h2>
         <p className="mb-4">

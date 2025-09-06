@@ -59,6 +59,7 @@ import { loadSheetWithSheetId } from "@/actions/loadSheet.action";
 import { joinToRoom } from "@/actions/joinRoom.action";
 import { useSingleSheetTab } from "@/hooks/use-single-sheet-tab";
 import { InfoTooltip } from "../mycomponents/info-tooltip";
+import { areCookiesEnabled } from "@/actions/cookieAllowed.action";
 
 
 
@@ -1671,16 +1672,20 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
     }
 
+
     const handleUnAuthorizedUsers = useCallback(async (mode: "session" | "sheet") => {
 
         //1) login the guest first 
         await loginAsGuest({ login, type: 'canvas', router })
         console.log("Guest login done")
 
+        // tiny delay helps mobile browsers commit cookies before next request
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
         if (mode === 'session') {
             //2) Load the particular sheet and Join the room
             const link = `${window.location.origin}/canvas/myroom/${sheetId}/${roomId}`
-            await joinToRoom({ url: link, saveSheet, updateRoomId, type: 'userFromLink' })
+            await joinToRoom({ url: link, saveSheet, updateRoomId, router, type: 'userFromLink' })
             console.log("Sheet loaded")
 
             //3) Start Websocket Server 
@@ -1690,6 +1695,9 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
         else {
             // 2) Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
             await loadSheetWithSheetId({ sheetId, saveSheet })
+
+            // navigate to sheet view
+            router.replace(`/canvas/myroom/${sheetId}/share-allowed`);
         }
 
 
@@ -1715,7 +1723,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                         if (roomId !== userData?.roomId) {
                             console.log('db roomid and user given roomid didnot match :- calling joinToRoom')
                             const link = `${window.location.origin}/canvas/myroom/${sheetId}/${roomId}`
-                            await joinToRoom({ url: link, saveSheet, updateRoomId, type: 'userFromLink' })
+                            await joinToRoom({ url: link, saveSheet, updateRoomId, router, type: 'userFromLink' })
                             console.log(`joined user to room ${roomId}`)
                         }
                         await handleStartWebsocketServer(accessToken);
@@ -1754,9 +1762,16 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 if (!accessToken) {
 
                     //UnAuthorized user 
+                    // Checking if cookies are allowed
                     // a) has roomId then that means its a webscoket session 
                     // b) no roomId then that means share sheet
                     // localStorage.setItem("originalUser", "false")
+
+                    if (!areCookiesEnabled()) {
+                        toast.error("Your browser does not allow cookies. You cannot join a session.");
+                        return; 
+                    }
+
                     if (roomId && !shareSheetAllowed) {
                         await handleUnAuthorizedUsers("session");
                     } else {
@@ -1769,6 +1784,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 // console.log('wrong login as guest')
                 console.log("Error while checking access token:", err);
                 // localStorage.setItem("originalUser", "false")
+
+                if (!areCookiesEnabled()) {
+                    toast.error("Your browser does not allow cookies. You cannot join a session.");
+                    return; 
+                }
+
                 if (roomId && !shareSheetAllowed) {
                     await handleUnAuthorizedUsers("session");
                 } else {
@@ -1779,7 +1800,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
         checkAccess();
 
-    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, handleUnAuthorizedUsers, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId])
+    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, handleUnAuthorizedUsers, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId, router])
 
 
 
