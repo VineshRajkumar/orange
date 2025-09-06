@@ -1486,6 +1486,12 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
         try {
 
+            //Checking limit 
+            const sizeInBytes = new TextEncoder().encode(JSON.stringify(diagrams.current)).length;
+            const sizeInKB = (sizeInBytes / 1024).toFixed(2);
+            const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
+            console.log(`Diagrams size: ${sizeInBytes} bytes (${sizeInKB} KB / ${sizeInMB} MB)`);
+
             const response = await axios.post('/sheets/save-sheet', { sheetId, data: diagrams.current }) as AxiosResponse
             const res = response.data as ApiResponse
             if (res.success === false) {
@@ -1774,7 +1780,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     // console.log(activeShape)
     // console.log(selectedShape)
     // console.log(darkMode)
-    // console.log(diagrams)
+    console.log(diagrams)
     // console.log('userdata.roomid', userData?.roomId)
     // console.log(toErase.current)
     // console.log(activeActionRef.current)
