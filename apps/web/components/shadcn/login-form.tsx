@@ -61,7 +61,8 @@ export function LoginForm() {
       toast.success(res.message)
 
       startTransition(() => {
-        setTimeout(() => router.push('/dashboard'), 1000);
+        // setTimeout(() => router.push('/dashboard'), 1000);
+        setTimeout(() => router.replace('/dashboard'), 1000);
       })
 
 

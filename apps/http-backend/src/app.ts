@@ -11,50 +11,29 @@ const app  = express()
 app.use(cors({
     origin: process.env.CORS_ORIGIN, //so that only frontend can access backend -> security
     credentials:true, //allows server to accept cookies,headers,client certificates etc
-    // methods: ['GET','POST','PUT','DELETE','PATCH','OPTIONS'], //needed for nextjs frontend
-    // allowedHeaders: ['Content-Type','Authorization'], //needed for nextjs frontend
 }))
 
-// const ALLOWED_ORIGINS = new Set([
-//   'https://orangeboard.vercel.app',
-//   'http://localhost:3000',
-// ]);
 
-// const corsOptions: cors.CorsOptions = {
-//   origin(origin, cb) {
-//     // allow SSR/no-origin, and explicit whitelisted origins
-//     if (!origin || ALLOWED_ORIGINS.has(origin)) {
-//         console.log('allowed origin comes', origin)
-//         return cb(null, true);
-//     }
-//     return cb(null, false);
-//   },
-//   credentials: true,
-//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-//   // ❌ Do NOT pin allowedHeaders; let the cors package reflect the request headers.
-//   // allowedHeaders: undefined
-// };
-// app.use(cors(corsOptions));
-
-// handle preflight OPTIONS requests for nextjs frontend 
-// Preflight means browser asking permission first to the backend 
-// and OPTIONS handler means backend server giving that permission
-// * here means to match this cors thing to all routes in express
-// app.options('*', cors());
-// app.options('/{*any}', cors(corsOptions));
-
-//these are for parsing so that when data comes express doesnot face any problem
-app.use(express.json({limit:"16kb"})) //json file limit -  Middleware to parse JSON request bodies
-app.use(express.urlencoded({extended:true,limit:"16kb"})) //make url encoded - Middleware to parse URL-encoded data
+// these are for parsing so that when data comes express doesnot face any problem
+// 144shapes take about 46kb -> so in 2mb -> 6411 shapes can be drawn
+// 144shapes take about 46kb -> so in 1mb -> 3205 shapes can be drawn
+// HERE FILE LIMIT IS SET AS 1MB AS 1MB CAN TAKE UPTO -> 3205 shapes can be drawn 
+// IF NEEDED TO INCREASE MORE SHAPES THEN LATER INCREASE THE LIMIT 
+app.use(express.json({limit:"1mb"})) //json file limit -  Middleware to parse JSON request bodies 
+app.use(express.urlencoded({extended:true,limit:"1mb"})) //make url encoded - Middleware to parse URL-encoded data
 app.use(express.static("public")) //to store pdf files
 app.use(cookieParser())
 
 // -----------
+// NOT NEEDED AS  NOT DOING IP CHECKING 
 // app.set is used to store configuration settings 
 // for your app -> Enable/disable features , 
 // Store environment values, Control how 
 // Express behaves
-app.set('trust proxy', true) //This is Express way of getting 
+
+// app.set('trust proxy', true) 
+
+// //This is Express way of getting 
 // ip address -> this is used to get the original 
 // ip address of user even if behind any proxy
 // (like Vercel,heroku) -> This tells Express to 

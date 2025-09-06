@@ -25,7 +25,8 @@ export const handlelogout = async ({logout, router, setLoggingOutLoader, message
         if (message && message !== '') toast.info(message)
         else toast.success(res.message)
 
-        setTimeout(() => router.push('/login'), 5000);
+        // setTimeout(() => router.push('/login'), 5000);
+        setTimeout(() => router.replace('/login'), 5000);
 
     } catch (err) {
 

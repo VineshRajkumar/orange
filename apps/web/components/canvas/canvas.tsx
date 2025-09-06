@@ -58,6 +58,7 @@ import { loginAsGuest } from "@/actions/loginGuest.action";
 import { loadSheetWithSheetId } from "@/actions/loadSheet.action";
 import { joinToRoom } from "@/actions/joinRoom.action";
 import { useSingleSheetTab } from "@/hooks/use-single-sheet-tab";
+import { InfoTooltip } from "../mycomponents/info-tooltip";
 
 
 
@@ -1006,7 +1007,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 //2) If first click then let the user type , on second click anywhere on the canvas save the text
                 if (activeDraw.current.type === "text") {
 
-                
+
                     if (editCounterRef.current < 1) {
 
                         //for mobile - In draw mode, when starting text since this is first click so open keyboard also
@@ -1486,11 +1487,17 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
         try {
 
-            //Checking limit 
+            //checking limit of the data with shapes 
             const sizeInBytes = new TextEncoder().encode(JSON.stringify(diagrams.current)).length;
             const sizeInKB = (sizeInBytes / 1024).toFixed(2);
             const sizeInMB = (sizeInBytes / (1024 * 1024)).toFixed(2);
             console.log(`Diagrams size: ${sizeInBytes} bytes (${sizeInKB} KB / ${sizeInMB} MB)`);
+            //only allow if limit less than 1mb -> in 1mb -> 3205 shapes can be drawn
+            if (parseFloat(sizeInMB) >= 1) {
+                throw new Error(
+                    `Sheet size exceeds 1 MB limit. Current size: ${sizeInKB} KB (${sizeInMB} MB). Please reduce the number of shapes before saving.`
+                );
+            }
 
             const response = await axios.post('/sheets/save-sheet', { sheetId, data: diagrams.current }) as AxiosResponse
             const res = response.data as ApiResponse
@@ -1780,7 +1787,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     // console.log(activeShape)
     // console.log(selectedShape)
     // console.log(darkMode)
-    console.log(diagrams)
+    // console.log(diagrams)
     // console.log('userdata.roomid', userData?.roomId)
     // console.log(toErase.current)
     // console.log(activeActionRef.current)
@@ -1789,604 +1796,785 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     // console.log(laserTrailRef)
     // console.log(editCounterRef)
     return (
-        <TooltipProvider>
-            <div className="h-screen w-screen relative">
 
-                {/* ------------------------------- */}
-                {/* TOP LEFT: Sheet Info */}
-                <div className="fixed md:max-w-[220px] top-3 left-4 z-10 text-sm">
-                    <div className="bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-4 py-2 shadow-md space-y-1">
-                        <div className="font-medium text-neutral-800 dark:text-neutral-200 text-base">
-                            {sheetData[sheetId]?.title || "Untitled Sheet"}
-                        </div>
-                        <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                            ID: <span className="break-all">{sheetId}</span>
-                        </div>
-                        <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                            Created: {new Date(sheetData[sheetId]?.createdAt || "").toLocaleString()}
-                        </div>
+        <div className="h-screen w-screen relative">
+
+            {/* ------------------------------- */}
+            {/* TOP LEFT: Sheet Info */}
+            <div className="fixed md:max-w-[220px] top-3 left-4 z-10 text-sm">
+                <div className="bg-neutral-100 dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-xl px-4 py-2 shadow-md space-y-1">
+                    <div className="font-medium text-neutral-800 dark:text-neutral-200 text-base">
+                        {sheetData[sheetId]?.title || "Untitled Sheet"}
+                    </div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                        ID: <span className="break-all">{sheetId}</span>
+                    </div>
+                    <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                        Created: {new Date(sheetData[sheetId]?.createdAt || "").toLocaleString()}
                     </div>
                 </div>
+            </div>
 
-                {/* ------------------------------- */}
-                {/* TOP TOOLBAR FROM WHERE DRAWING CAN BE DONE  */}
-                <div className=" hidden md:block fixed z-2 w-fit h-fit bg-white dark:bg-black rounded-lg left-1/2 top-3 transform -translate-x-1/2">
-                    <div className="bg-orange-400/25 dark:bg-orange-300/20 z-1 rounded-lg px-1.5 py-1 flex gap-1.5 items-center">
+            {/* ------------------------------- */}
+            {/* TOP TOOLBAR FROM WHERE DRAWING CAN BE DONE  */}
+            <div className=" hidden md:block fixed z-2 w-fit h-fit bg-white dark:bg-black rounded-lg left-1/2 top-3 transform -translate-x-1/2">
+                <div className="bg-orange-400/25 dark:bg-orange-300/20 z-1 rounded-lg px-1.5 py-1 flex gap-1.5 items-center">
 
-                        {/* (select/move/resize) button */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "select" || activeAction === "move" || activeAction === "resize"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
+                    {/* (select/move/resize) button */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "select" || activeAction === "move" || activeAction === "resize"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
 
-                            onClick={() => {
-                                setActiveAction("select");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "select" ||
-                                activeAction === "move" ||
-                                activeAction === "resize" ? (
-                                <PiCursorFill className="text-black dark:text-white" size="18" />
-                            ) : (
-                                <PiCursor className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                1
-                            </p>
-                        </Button>
+                        onClick={() => {
+                            setActiveAction("select");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "select" ||
+                            activeAction === "move" ||
+                            activeAction === "resize" ? (
+                            <PiCursorFill className="text-black dark:text-white" size="18" />
+                        ) : (
+                            <PiCursor className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            1
+                        </p>
+                    </Button>
 
-                        {/* rectangle button */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "rectangle"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("rectangle");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "draw" && activeShape === "rectangle" ? (
-                                <PiSquareFill className="text-black dark:text-white " size="18" />
-                            ) : (
-                                <PiSquare className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                2
-                            </p>
-
-
-                        </Button>
-
-                        {/* diamond  */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "diamond"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("diamond");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "draw" && activeShape === "diamond" ? (
-                                <PiDiamondFill className="text-black dark:text-white" size="18" />
-                            ) : (
-                                <PiDiamond className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                3
-                            </p>
-                        </Button>
-
-                        {/* circle  */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "circle"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("circle");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "draw" && activeShape === "circle" ? (
-                                <PiCircleFill className="text-black dark:text-white" size="18" />
-                            ) : (
-                                <PiCircle className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                4
-                            </p>
-                        </Button>
+                    {/* rectangle button */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "rectangle"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("rectangle");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "draw" && activeShape === "rectangle" ? (
+                            <PiSquareFill className="text-black dark:text-white " size="18" />
+                        ) : (
+                            <PiSquare className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            2
+                        </p>
 
 
-                        {/* line  */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "line"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("line");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            <PiLineVertical className="text-black dark:text-white rotate-90" size="18" />
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                5
-                            </p>
-                        </Button>
+                    </Button>
 
-                        {/* arrow */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "arrow"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
+                    {/* diamond  */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "diamond"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
 
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("arrow");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            <PiArrowRight className="text-black dark:text-white " size="18" />
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                6
-                            </p>
-                        </Button>
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("diamond");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "draw" && activeShape === "diamond" ? (
+                            <PiDiamondFill className="text-black dark:text-white" size="18" />
+                        ) : (
+                            <PiDiamond className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            3
+                        </p>
+                    </Button>
 
-
-                        {/* freehand */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "freeHand"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("freeHand");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "draw" && activeShape === "freeHand" ? (
-                                <PiPencilFill className="text-black dark:text-white" size="18" />
-                            ) : (
-                                <PiPencil className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                7
-                            </p>
-                        </Button>
-
-                        {/* TEXT  */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${(activeAction === "draw" && activeShape === "text") || activeAction === "edit"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("draw");
-                                setActiveShape("text");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            <BsFonts className="text-black dark:text-white" size="20" />
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                8
-                            </p>
-                        </Button>
-
-                        {/* Erase  */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent relative p-2 ${activeAction === "erase"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("erase");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "erase" ? (
-                                <PiEraserFill className="text-black dark:text-white" size="18" />
-                            ) : (
-                                <PiEraser className="text-black dark:text-white" size="18" />
-                            )}
-                            <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
-                                9
-                            </p>
-                        </Button>
-                        <PiLineVerticalLight size="20" />
+                    {/* circle  */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "circle"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("circle");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "draw" && activeShape === "circle" ? (
+                            <PiCircleFill className="text-black dark:text-white" size="18" />
+                        ) : (
+                            <PiCircle className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            4
+                        </p>
+                    </Button>
 
 
-                        {/* pan */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent -ml-1 relative p-2 ${activeAction === "pan"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
+                    {/* line  */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "line"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("line");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        <PiLineVertical className="text-black dark:text-white rotate-90" size="18" />
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            5
+                        </p>
+                    </Button>
 
-                            onClick={() => {
-                                setActiveAction("pan");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            {activeAction === "pan" && isDragging ? (
-                                <LiaHandRock className="text-black dark:text-white " />
-                            ) : (
-                                <LiaHandPaper className="text-black dark:text-white " />
-                            )}
-                        </Button>
+                    {/* arrow */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "arrow"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
 
-                        {/* zoom */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent -ml-0.5 relative p-2 ${activeAction === "zoom"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("zoom");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            <TbZoom className="text-black dark:text-white " />
-                        </Button>
-
-                        {/* laser */}
-                        <Button
-                            size="icon"
-                            className={`bg-transparent -ml-0.5 relative p-2 ${activeAction === "laser"
-                                ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
-                                : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
-                                } cursor-pointer`}
-
-                            onClick={() => {
-                                setActiveAction("laser");
-                                if (activeDraw.current?.type === "text") {
-                                    activeDraw.current = null;
-                                    shapeSelectionBox.current = null;
-                                }
-                            }}
-                        >
-                            <GiLaserGun className="text-black dark:text-white " />
-                        </Button>
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("arrow");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        <PiArrowRight className="text-black dark:text-white " size="18" />
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            6
+                        </p>
+                    </Button>
 
 
-                    </div>
-                    {activeAction === "zoom" ? <div className="text-xs text-center px-2 py-0.5 mt-1 rounded-md bg-orange-200/50 text-orange-800 dark:bg-orange-300/10 dark:text-orange-200 transition-all duration-300">
-                        Hold <kbd className="px-1 border border-gray-400 rounded dark:border-gray-500">Ctrl</kbd> and scroll to zoom in/out
-                    </div> : ""}
+                    {/* freehand */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "draw" && activeShape === "freeHand"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("freeHand");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "draw" && activeShape === "freeHand" ? (
+                            <PiPencilFill className="text-black dark:text-white" size="18" />
+                        ) : (
+                            <PiPencil className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            7
+                        </p>
+                    </Button>
+
+                    {/* TEXT  */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${(activeAction === "draw" && activeShape === "text") || activeAction === "edit"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("draw");
+                            setActiveShape("text");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        <BsFonts className="text-black dark:text-white" size="20" />
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            8
+                        </p>
+                    </Button>
+
+                    {/* Erase  */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent relative p-2 ${activeAction === "erase"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("erase");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "erase" ? (
+                            <PiEraserFill className="text-black dark:text-white" size="18" />
+                        ) : (
+                            <PiEraser className="text-black dark:text-white" size="18" />
+                        )}
+                        <p className="text-black dark:text-white font-mono absolute text-[8px] right-1 bottom-1">
+                            9
+                        </p>
+                    </Button>
+                    <PiLineVerticalLight size="20" />
+
+
+                    {/* pan */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent -ml-1 relative p-2 ${activeAction === "pan"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("pan");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        {activeAction === "pan" && isDragging ? (
+                            <LiaHandRock className="text-black dark:text-white " />
+                        ) : (
+                            <LiaHandPaper className="text-black dark:text-white " />
+                        )}
+                    </Button>
+
+                    {/* zoom */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent -ml-0.5 relative p-2 ${activeAction === "zoom"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("zoom");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        <TbZoom className="text-black dark:text-white " />
+                    </Button>
+
+                    {/* laser */}
+                    <Button
+                        size="icon"
+                        className={`bg-transparent -ml-0.5 relative p-2 ${activeAction === "laser"
+                            ? "bg-orange-600 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-500"
+                            : "hover:bg-orange-600/20 dark:hover:bg-orange-400/20"
+                            } cursor-pointer`}
+
+                        onClick={() => {
+                            setActiveAction("laser");
+                            if (activeDraw.current?.type === "text") {
+                                activeDraw.current = null;
+                                shapeSelectionBox.current = null;
+                            }
+                        }}
+                    >
+                        <GiLaserGun className="text-black dark:text-white " />
+                    </Button>
+
+
                 </div>
+                {activeAction === "zoom" ? <div className="text-xs text-center px-2 py-0.5 mt-1 rounded-md bg-orange-200/50 text-orange-800 dark:bg-orange-300/10 dark:text-orange-200 transition-all duration-300">
+                    Hold <kbd className="px-1 border border-gray-400 rounded dark:border-gray-500">Ctrl</kbd> and scroll to zoom in/out
+                </div> : ""}
+            </div>
 
-                {/* ------------------------------- */}
+            {/* ------------------------------- */}
 
-                {/* SAVE & DASHBOARD BUTTON TOP-RIGHT CORNER */}
-                <div className="fixed top-3 right-4 z-10 flex gap-3">
-                    {/* DASHBOARD BUTTON (Top-Right) */}
+            {/* SAVE & DASHBOARD BUTTON TOP-RIGHT CORNER */}
+            <div className="fixed top-3 right-4 z-10 flex gap-3">
+                {/* DASHBOARD BUTTON (Top-Right) */}
 
-                    <Link
-                        href="/dashboard"
-                        className="
+                <Link
+                    href="/dashboard"
+                    className="
                             flex items-center gap-2 px-3 py-1.5 rounded-lg
                             font-medium text-sm transition-all duration-200
                             hover:bg-sky-500/20 dark:hover:bg-sky-400/20
                             bg-white dark:bg-black border border-sky-300 dark:border-sky-500
                             text-sky-700 dark:text-sky-300
                             "
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h11M9 21V3" />
-                        </svg>
-                        <span className="hidden md:block">Dashboard</span>
-                    </Link>
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h11M9 21V3" />
+                    </svg>
+                    <span className="hidden md:block">Dashboard</span>
+                </Link>
 
 
-                    {/* SAVE BUTTON TOP-RIGHT */}
+                {/* SAVE BUTTON TOP-RIGHT */}
 
-                    <button
-                        onClick={handleSaveSheet}
-                        disabled={savebtnLoader}
-                        className={`
+                <button
+                    onClick={handleSaveSheet}
+                    disabled={savebtnLoader}
+                    className={`
                             flex items-center gap-2 px-3 py-1.5 rounded-lg
                             font-medium text-sm transition-all duration-200
                             ${savebtnLoader ? "cursor-not-allowed opacity-70" : "hover:bg-orange-500/20 dark:hover:bg-orange-400/20"}
                             bg-white dark:bg-black border border-orange-300 dark:border-orange-500
                             text-orange-700 dark:text-orange-300
                         `}
-                    >
-                        {savebtnLoader ? (
-                            <div className="h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                        )}
-                        <span className="hidden md:block">{savebtnLoader ? "Saving..." : "Save"}</span>
-                    </button>
+                >
+                    {savebtnLoader ? (
+                        <div className="h-4 w-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                    )}
+                    <span className="hidden md:block">{savebtnLoader ? "Saving..." : "Save"}</span>
+                </button>
 
-                    {/* SHARE BUTTON (Popup) */}
-                    {/* only the owner of sheet can share and stop session */}
-                    {/* if the owner shares a sheet and tries to open session from the shared sheet then dont allow */}
-                    {sheetData && userData ? (
-                        // && (localStorage.getItem('originalUser') === 'true')
-                        (sheetData[sheetId]?.ownerId === userData.id) ? (
+                {/* SHARE BUTTON (Popup) */}
+                {/* only the owner of sheet can share and stop session */}
+                {/* if the owner shares a sheet and tries to open session from the shared sheet then dont allow */}
+                {sheetData && userData ? (
+                    // && (localStorage.getItem('originalUser') === 'true')
+                    (sheetData[sheetId]?.ownerId === userData.id) ? (
 
-                            <Dialog>
-                                <DialogTrigger asChild>
-                                    <button
-                                        className="
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <button
+                                    className="
                             flex items-center gap-2 px-3 py-1.5 rounded-lg
                             font-medium text-sm transition-all duration-200
                             hover:bg-purple-500/20 dark:hover:bg-purple-400/20
                             bg-white dark:bg-black border border-purple-300 dark:border-purple-500
                             text-purple-700 dark:text-purple-300
                             "
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8m-8 6h8m-8 6h8" />
-                                        </svg>
-                                        <span className="hidden md:block">Share</span>
-                                    </button>
-                                </DialogTrigger>
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M4 6h8m-8 6h8m-8 6h8" />
+                                    </svg>
+                                    <span className="hidden md:block">Share</span>
+                                </button>
+                            </DialogTrigger>
 
-                                <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md">
-                                    <DialogHeader>
-                                        <div className="flex items-center">
-                                            <DialogTitle className="text-lg font-semibold pr-2">
-                                                Share this Sheet
-                                            </DialogTitle>
-                                            <Tooltip >
-                                                <TooltipTrigger asChild>
-                                                    <button
-                                                        type="button"
-                                                        className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                                    >
-                                                        <Info className="h-4 w-4" />
-                                                    </button>
-                                                </TooltipTrigger>
-                                                <TooltipContent
-                                                    side="top"
-                                                    className="max-w-sm p-2"
-                                                >
-                                                    <div >
-                                                        <strong>
-                                                            Before You Start a Session:
-                                                        </strong>
-                                                        <ul className="list-disc pl-4 space-y-1 py-3">
-                                                            <li>
-                                                                <span className="font-medium">Last write wins:</span> The update
-                                                                that arrives last overwrites earlier ones (slower connections can
-                                                                overwrite faster ones).
-                                                            </li>
-                                                            <li>
-                                                                <span className="font-medium">Saved shapes vs. live edits:</span>{" "}
-                                                                Shapes saved earlier will reappear after reload—even if erased
-                                                                during a live session. But if a shape is deleted and saved, it is
-                                                                gone for everyone.
-                                                            </li>
-                                                            <li>
-                                                                <span className="font-medium">Temporary edits:</span> If you erase
-                                                                or draw only during a WebSocket connection (without saving), it
-                                                                exists only for the live session.
-                                                            </li>
-                                                            <li>
-                                                                <span className="font-medium">Sharing links:</span> A sheet or room
-                                                                link can be shared with anyone. They dont need an account. They will be
-                                                                logged in as guests automatically.
-                                                            </li>
-                                                            <li>
-                                                                For best experience, save often to avoid losing work after
-                                                                disconnects.
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </TooltipContent>
-                                            </Tooltip>
+                            <DialogContent onOpenAutoFocus={(e) => e.preventDefault()} className="sm:max-w-md">
+                                <DialogHeader>
+                                    <div className="flex items-center">
+                                        <DialogTitle className="text-lg font-semibold pr-2">
+                                            Share this Sheet
+                                        </DialogTitle>
+
+                                        <InfoTooltip
+                                            content={
+                                                <div >
+                                                    <strong>
+                                                        Before You Start a Session:
+                                                    </strong>
+                                                    <ul className="list-disc pl-4 space-y-1 py-3">
+                                                        <li>
+                                                            <span className="font-medium">Last write wins:</span> The update
+                                                            that arrives last overwrites earlier ones (slower connections can
+                                                            overwrite faster ones).
+                                                        </li>
+                                                        <li>
+                                                            <span className="font-medium">Saved shapes vs. live edits:</span>{" "}
+                                                            Shapes saved earlier will reappear after reload—even if erased
+                                                            during a live session. But if a shape is deleted and saved, it is
+                                                            gone for everyone.
+                                                        </li>
+                                                        <li>
+                                                            <span className="font-medium">Temporary edits:</span> If you erase
+                                                            or draw only during a WebSocket connection (without saving), it
+                                                            exists only for the live session.
+                                                        </li>
+                                                        <li>
+                                                            <span className="font-medium">Sharing links:</span> A sheet or room
+                                                            link can be shared with anyone. They dont need an account. They will be
+                                                            logged in as guests automatically.
+                                                        </li>
+                                                        <li>
+                                                            <span className="font-medium">Reload after disconnect:</span> If you
+                                                            get disconnected from a session, please reload the page to
+                                                            re-establish connection and avoid missing updates.
+                                                        </li>
+                                                        <li>
+                                                            For best experience, save often to avoid losing work after
+                                                            disconnects.
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            }
+                                        >
+
+                                            <button
+                                                type="button"
+                                                className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                            >
+                                                <Info className="h-4 w-4" />
+                                            </button>
+
+                                        </InfoTooltip>
+
+                                    </div>
+                                </DialogHeader>
+
+                                {(userData.roomId) ? (
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                ref={inputRef}
+                                                readOnly
+                                                value={
+                                                    isLoading
+                                                        ? "Loading..."
+                                                        : isError
+                                                            ? "Error: Please Try Again"
+                                                            : `${window.location.origin}/canvas/myroom/${sheetId}/${userData.roomId}`
+                                                }
+                                                className="flex-1"
+                                            />
+                                            <Button
+                                                onClick={handleCopy}
+                                                variant="outline"
+                                                className="border-orange-400 text-orange-600 dark:text-orange-300 hover:bg-orange-500/20"
+                                            >
+                                                {copied ? (
+                                                    <>
+                                                        <Check className="h-4 w-4" />
+                                                        Copied
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Copy className="h-4 w-4" />
+                                                        Copy
+                                                    </>
+                                                )}
+                                            </Button>
                                         </div>
-                                    </DialogHeader>
 
-                                    {(userData.roomId) ? (
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex items-center gap-2">
-                                                <Input
-                                                    ref={inputRef}
-                                                    readOnly
-                                                    value={
-                                                        isLoading
-                                                            ? "Loading..."
-                                                            : isError
-                                                                ? "Error: Please Try Again"
-                                                                : `${window.location.origin}/canvas/myroom/${sheetId}/${userData.roomId}`
-                                                    }
-                                                    className="flex-1"
-                                                />
-                                                <Button
-                                                    onClick={handleCopy}
-                                                    variant="outline"
-                                                    className="border-orange-400 text-orange-600 dark:text-orange-300 hover:bg-orange-500/20"
-                                                >
-                                                    {copied ? (
-                                                        <>
-                                                            <Check className="h-4 w-4" />
-                                                            Copied
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            <Copy className="h-4 w-4" />
-                                                            Copy
-                                                        </>
-                                                    )}
-                                                </Button>
-                                            </div>
+                                        <DialogFooter>
+                                            <Button
+                                                disabled={isError}
+                                                onClick={handleStopSession}
+                                                className="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg"
+                                            >
+                                                Stop Session
+                                            </Button>
+                                        </DialogFooter>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col gap-4">
+                                        <p className="text-sm text-muted-foreground">
+                                            Start a session to collaborate with others in real-time.
+                                        </p>
+                                        <DialogFooter>
+                                            <Button
+                                                onClick={handleStartSession}
+                                                className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
+                                                disabled={sessionLoader}
+                                            >
+                                                {sessionLoader ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Starting...
+                                                    </>
+                                                ) : (
+                                                    "Start Session"
+                                                )}
+                                            </Button>
 
-                                            <DialogFooter>
-                                                <Button
-                                                    disabled={isError}
-                                                    onClick={handleStopSession}
-                                                    className="w-full bg-red-500 hover:bg-red-600 text-white rounded-lg"
-                                                >
-                                                    Stop Session
-                                                </Button>
-                                            </DialogFooter>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col gap-4">
-                                            <p className="text-sm text-muted-foreground">
-                                                Start a session to collaborate with others in real-time.
-                                            </p>
-                                            <DialogFooter>
-                                                <Button
-                                                    onClick={handleStartSession}
-                                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-lg"
-                                                    disabled={sessionLoader}
-                                                >
-                                                    {sessionLoader ? (
-                                                        <>
-                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                            Starting...
-                                                        </>
-                                                    ) : (
-                                                        "Start Session"
-                                                    )}
-                                                </Button>
+                                        </DialogFooter>
+                                    </div>
+                                )}
 
-                                            </DialogFooter>
-                                        </div>
-                                    )}
+                                <Button
+                                    onClick={handleShareSheet}
+                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
+                                >
+                                    Share Sheet
+                                </Button>
 
-                                    <Button
-                                        onClick={handleShareSheet}
-                                        className="w-full bg-blue-500 hover:bg-blue-600 text-white rounded-lg"
-                                    >
-                                        Share Sheet
-                                    </Button>
+                            </DialogContent>
+                        </Dialog>
+                    )
+                        : ('')
+                ) : ('')}
 
-                                </DialogContent>
-                            </Dialog>
-                        )
-                            : ('')
-                    ) : ('')}
-
-                </div>
+            </div>
 
 
-                {/* ------------------------------- */}
+            {/* ------------------------------- */}
 
-                {/* SIDE BAR TO SHOW COLOR AND ALL */}
-                {activeAction === "draw" ||
-                    (activeAction === "select" && selectedShape !== null) ?
-                    ((activeShape === "text" || selectedShape === "text") ? (
+            {/* SIDE BAR TO SHOW COLOR AND ALL */}
+            {activeAction === "draw" ||
+                (activeAction === "select" && selectedShape !== null) ?
+                ((activeShape === "text" || selectedShape === "text") ? (
 
-                        //FOR TEXT 
-                        <div className="md:block hidden  fixed px-5 py-6 z-10 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] shadow-black left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
-                            <div className="space-y-2 items-center rounded-md text-black dark:text-white">
+                    //FOR TEXT 
+                    <div className="md:block hidden  fixed px-5 py-6 z-10 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] shadow-black left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
+                        <div className="space-y-2 items-center rounded-md text-black dark:text-white">
 
-                                {/* color  */}
-                                <div className="text-sm">
-                                    <h3 className="py-1.5">Color</h3>
-                                    <div className="flex items-center gap-2">
-                                        {darkMode ?
-                                            (<>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#eeeeee] hover:bg-[#dddddd] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#eeeeee")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#FFD586] hover:bg-[#fbc169] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#FFD586")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#FF9898] hover:bg-[#f87b7b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#FF9898")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#B9D4AA] hover:bg-[#a3c695] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#B9D4AA")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#8DD8FF] hover:bg-[#6fc9f9] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#8DD8FF")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <PiLineVerticalLight size="20" />
-                                                <Button
-                                                    size="icon"
-                                                    className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                    style={{ backgroundColor: activeStrokeColor }}
-                                                ></Button>
+                            {/* color  */}
+                            <div className="text-sm">
+                                <h3 className="py-1.5">Color</h3>
+                                <div className="flex items-center gap-2">
+                                    {darkMode ?
+                                        (<>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#eeeeee] hover:bg-[#dddddd] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#eeeeee")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#FFD586] hover:bg-[#fbc169] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#FFD586")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#FF9898] hover:bg-[#f87b7b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#FF9898")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#B9D4AA] hover:bg-[#a3c695] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#B9D4AA")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#8DD8FF] hover:bg-[#6fc9f9] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#8DD8FF")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <PiLineVerticalLight size="20" />
+                                            <Button
+                                                size="icon"
+                                                className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                style={{ backgroundColor: activeStrokeColor }}
+                                            ></Button>
 
-                                            </>) : (<>
+                                        </>) : (<>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#1e1e1e] hover:bg-[#2a2a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#1e1e1e")}
+                                            >
+                                                ..
+                                            </Button>
+
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#4A90E2] hover:bg-[#357ABD] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#4A90E2")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#50E3C2] hover:bg-[#3AC9AA] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#50E3C2")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#F5A623] hover:bg-[#D98C10] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#F5A623")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#FF6F61] hover:bg-[#E25448] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#FF6F61")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#7ED321] hover:bg-[#68B71B] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#7ED321")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#BD10E0] hover:bg-[#9B0DC0] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#BD10E0")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <PiLineVerticalLight size="20" />
+                                            <Button
+                                                size="icon"
+                                                className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                style={{ backgroundColor: activeStrokeColor }}
+                                            ></Button>
+
+                                        </>)
+                                    }
+                                </div>
+                            </div>
+
+                            {/* font  */}
+                            <div className="text-sm">
+                                <h3 className="py-1.5">Font</h3>
+                                <div className="flex items-center gap-2">
+                                    {["Arial", "Verdana", "Comic Sans MS"].map((font) => (
+                                        <Button
+                                            key={font}
+                                            size="sm"
+                                            className={`relative cursor-pointer font-[${font}] -mr-1 rounded-md ${activeFont === font
+                                                ? "bg-[#E95C0C] text-white"
+                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
+                                                }`}
+                                            onClick={() => changeActiveFont(font)}
+                                        >
+                                            Abc
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* font size  */}
+                            <div className="text-sm">
+                                <h3 className="py-1.5">Font Size</h3>
+                                <div className="flex items-center gap-2">
+                                    {[20, 40, 60].map((size) => (
+                                        <Button
+                                            key={size}
+                                            size="sm"
+                                            className={`relative cursor-pointer -mr-1 rounded-md ${activeFontSize === String(size)
+                                                ? "bg-[#E95C0C] text-white"
+                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
+                                                }`}
+                                            onClick={() => changeActiveFontSize(size)}
+                                        >
+                                            {size === 20 ? "S" : size === 40 ? "M" : "L"}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
+                ) : activeShape === "freeHand" ||
+                    activeShape === "arrow" ||
+                    activeShape === "line" ||
+                    selectedShape === "freeHand" ||
+                    selectedShape === "arrow" ||
+                    selectedShape === "line" ? (
+                    //FOR ARROW,LINE,FREEHAND(pen/pencil)
+                    <div className="md:block hidden fixed px-3 py-2 z-2 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
+                        <div className="space-y-2 items-center rounded-md text-black dark:text-white">
+
+                            <div className="text-sm">
+                                <h3 className="font-medium py-1.5">Stroke Color</h3>
+                                <div className="flex items-center gap-2">
+                                    {darkMode ?
+
+                                        (<>
+                                            <Button
+                                                size="sm"
+                                                className="bg-white hover:bg-neutral-200 relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ffffff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#ff4d4f] hover:bg-[#ff6b6b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ff4d4f")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#00c853] hover:bg-[#00e676] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#00c853")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#40c4ff] hover:bg-[#69e2ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#40c4ff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#ffd600] hover:bg-[#ffeb3b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ffd600")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#b388ff] hover:bg-[#d0b3ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#b388ff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <PiLineVerticalLight size="20" />
+                                            <Button
+                                                size="icon"
+                                                className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                style={{ backgroundColor: activeStrokeColor }}
+                                            ></Button>
+
+                                        </>
+                                        ) : (
+
+                                            <>
                                                 <Button
                                                     size="sm"
                                                     className="bg-[#1e1e1e] hover:bg-[#2a2a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
@@ -2394,46 +2582,31 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                                                 >
                                                     ..
                                                 </Button>
-
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#4A90E2] hover:bg-[#357ABD] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#4A90E2")}
+                                                    className="bg-[#e03131] hover:bg-[#c92a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#e03131")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#50E3C2] hover:bg-[#3AC9AA] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#50E3C2")}
+                                                    className="bg-[#2f9e44] hover:bg-[#2b8a3e] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#2f9e44")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#F5A623] hover:bg-[#D98C10] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#F5A623")}
+                                                    className="bg-[#1971c2] hover:bg-[#1864ab] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#1971c2")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#FF6F61] hover:bg-[#E25448] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#FF6F61")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#7ED321] hover:bg-[#68B71B] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#7ED321")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#BD10E0] hover:bg-[#9B0DC0] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#BD10E0")}
+                                                    className="bg-[#f08c00] hover:bg-[#e67700] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#f08c00")}
                                                 >
                                                     ..
                                                 </Button>
@@ -2443,300 +2616,185 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                                                     className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
                                                     style={{ backgroundColor: activeStrokeColor }}
                                                 ></Button>
-
-                                            </>)
-                                        }
-                                    </div>
-                                </div>
-
-                                {/* font  */}
-                                <div className="text-sm">
-                                    <h3 className="py-1.5">Font</h3>
-                                    <div className="flex items-center gap-2">
-                                        {["Arial", "Verdana", "Comic Sans MS"].map((font) => (
-                                            <Button
-                                                key={font}
-                                                size="sm"
-                                                className={`relative cursor-pointer font-[${font}] -mr-1 rounded-md ${activeFont === font
-                                                    ? "bg-[#E95C0C] text-white"
-                                                    : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
-                                                    }`}
-                                                onClick={() => changeActiveFont(font)}
-                                            >
-                                                Abc
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* font size  */}
-                                <div className="text-sm">
-                                    <h3 className="py-1.5">Font Size</h3>
-                                    <div className="flex items-center gap-2">
-                                        {[20, 40, 60].map((size) => (
-                                            <Button
-                                                key={size}
-                                                size="sm"
-                                                className={`relative cursor-pointer -mr-1 rounded-md ${activeFontSize === String(size)
-                                                    ? "bg-[#E95C0C] text-white"
-                                                    : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
-                                                    }`}
-                                                onClick={() => changeActiveFontSize(size)}
-                                            >
-                                                {size === 20 ? "S" : size === 40 ? "M" : "L"}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-
-
-
-                    ) : activeShape === "freeHand" ||
-                        activeShape === "arrow" ||
-                        activeShape === "line" ||
-                        selectedShape === "freeHand" ||
-                        selectedShape === "arrow" ||
-                        selectedShape === "line" ? (
-                        //FOR ARROW,LINE,FREEHAND(pen/pencil)
-                        <div className="md:block hidden fixed px-3 py-2 z-2 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
-                            <div className="space-y-2 items-center rounded-md text-black dark:text-white">
-
-                                <div className="text-sm">
-                                    <h3 className="font-medium py-1.5">Stroke Color</h3>
-                                    <div className="flex items-center gap-2">
-                                        {darkMode ?
-
-                                            (<>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-white hover:bg-neutral-200 relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ffffff")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#ff4d4f] hover:bg-[#ff6b6b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ff4d4f")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#00c853] hover:bg-[#00e676] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#00c853")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#40c4ff] hover:bg-[#69e2ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#40c4ff")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#ffd600] hover:bg-[#ffeb3b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ffd600")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#b388ff] hover:bg-[#d0b3ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#b388ff")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <PiLineVerticalLight size="20" />
-                                                <Button
-                                                    size="icon"
-                                                    className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                    style={{ backgroundColor: activeStrokeColor }}
-                                                ></Button>
-
                                             </>
-                                            ) : (
-
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#1e1e1e] hover:bg-[#2a2a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#1e1e1e")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#e03131] hover:bg-[#c92a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#e03131")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#2f9e44] hover:bg-[#2b8a3e] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#2f9e44")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#1971c2] hover:bg-[#1864ab] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#1971c2")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#f08c00] hover:bg-[#e67700] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#f08c00")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <PiLineVerticalLight size="20" />
-                                                    <Button
-                                                        size="icon"
-                                                        className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                        style={{ backgroundColor: activeStrokeColor }}
-                                                    ></Button>
-                                                </>
-                                            )
-                                        }
-                                    </div>
+                                        )
+                                    }
                                 </div>
-
-                                <div className="text-sm">
-                                    <h3 className="font-medium py-1.5">Stroke Width</h3>
-                                    <div className="flex items-center gap-2">
-                                        <Button
-                                            size="sm"
-                                            className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 2
-                                                ? "bg-[#E95C0C] text-white"
-                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
-                                                }`}
-                                            onClick={() => changeActiveLineWidth(2)}
-                                        >
-                                            <svg
-                                                aria-hidden="true"
-                                                focusable="false"
-                                                role="img"
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <path d="M4.167 10h11.666" strokeWidth="1.25" />
-                                            </svg>
-                                        </Button>
-
-                                        <Button
-                                            size="sm"
-                                            className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 3
-                                                ? "bg-[#E95C0C] text-white"
-                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
-                                                }`}
-                                            onClick={() => changeActiveLineWidth(3)}
-                                        >
-                                            <svg
-                                                aria-hidden="true"
-                                                focusable="false"
-                                                role="img"
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <path d="M5 10h10" strokeWidth="2.5" />
-                                            </svg>
-                                        </Button>
-
-                                        <Button
-                                            size="sm"
-                                            className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 4
-                                                ? "bg-[#E95C0C] text-white"
-                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
-                                                }`}
-                                            onClick={() => changeActiveLineWidth(4)}
-                                        >
-                                            <svg
-                                                aria-hidden="true"
-                                                focusable="false"
-                                                role="img"
-                                                viewBox="0 0 20 20"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <path d="M5 10h10" strokeWidth="3.75" />
-                                            </svg>
-                                        </Button>
-                                    </div>
-                                </div>
-
                             </div>
+
+                            <div className="text-sm">
+                                <h3 className="font-medium py-1.5">Stroke Width</h3>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        size="sm"
+                                        className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 2
+                                            ? "bg-[#E95C0C] text-white"
+                                            : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
+                                            }`}
+                                        onClick={() => changeActiveLineWidth(2)}
+                                    >
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            role="img"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M4.167 10h11.666" strokeWidth="1.25" />
+                                        </svg>
+                                    </Button>
+
+                                    <Button
+                                        size="sm"
+                                        className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 3
+                                            ? "bg-[#E95C0C] text-white"
+                                            : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
+                                            }`}
+                                        onClick={() => changeActiveLineWidth(3)}
+                                    >
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            role="img"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M5 10h10" strokeWidth="2.5" />
+                                        </svg>
+                                    </Button>
+
+                                    <Button
+                                        size="sm"
+                                        className={`relative cursor-pointer -mr-1 rounded-md ${activestrokeWidth === 4
+                                            ? "bg-[#E95C0C] text-white"
+                                            : "bg-[#fbcfa1] hover:bg-[#f5c186] dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423] text-black dark:text-white"
+                                            }`}
+                                        onClick={() => changeActiveLineWidth(4)}
+                                    >
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            role="img"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path d="M5 10h10" strokeWidth="3.75" />
+                                        </svg>
+                                    </Button>
+                                </div>
+                            </div>
+
                         </div>
+                    </div>
 
 
-                    ) : (
-                        //other shapes 
-                        <div className="md:block hidden  fixed px-3 py-2 z-2 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
-                            <div className="space-y-2 items-center rounded-md text-black dark:text-white">
+                ) : (
+                    //other shapes 
+                    <div className="md:block hidden  fixed px-3 py-2 z-2 w-fit h-fit border border-[#fbc98d] dark:border-[#3e2d1e] left-3 top-1/2 transform -translate-y-1/2 bg-[#FFEAD6] dark:bg-[#2a1f16] rounded-md">
+                        <div className="space-y-2 items-center rounded-md text-black dark:text-white">
 
-                                {/* Stroke */}
-                                <div className="text-sm">
-                                    <h3 className="font-medium py-1.5" >Stroke Color</h3>
+                            {/* Stroke */}
+                            <div className="text-sm">
+                                <h3 className="font-medium py-1.5" >Stroke Color</h3>
 
-                                    <div className="flex items-center gap-2">
-                                        {darkMode ?
+                                <div className="flex items-center gap-2">
+                                    {darkMode ?
 
-                                            (<>
+                                        (<>
+                                            <Button
+                                                size="sm"
+                                                className="bg-white hover:bg-neutral-200 relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ffffff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#ff4d4f] hover:bg-[#ff6b6b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ff4d4f")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#00c853] hover:bg-[#00e676] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#00c853")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#40c4ff] hover:bg-[#69e2ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#40c4ff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#ffd600] hover:bg-[#ffeb3b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#ffd600")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="bg-[#b388ff] hover:bg-[#d0b3ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                onClick={() => changeActiveStrokeStyle("#b388ff")}
+                                            >
+                                                ..
+                                            </Button>
+                                            <PiLineVerticalLight size="20" />
+                                            <Button
+                                                size="icon"
+                                                className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                style={{ backgroundColor: activeStrokeColor }}
+                                            ></Button>
+
+                                        </>
+                                        ) : (
+
+                                            <>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-white hover:bg-neutral-200 relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ffffff")}
+                                                    className="bg-[#1e1e1e] hover:bg-[#2a2a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#1e1e1e")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#ff4d4f] hover:bg-[#ff6b6b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ff4d4f")}
+                                                    className="bg-[#e03131] hover:bg-[#c92a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#e03131")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#00c853] hover:bg-[#00e676] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#00c853")}
+                                                    className="bg-[#2f9e44] hover:bg-[#2b8a3e] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#2f9e44")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#40c4ff] hover:bg-[#69e2ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#40c4ff")}
+                                                    className="bg-[#1971c2] hover:bg-[#1864ab] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#1971c2")}
                                                 >
                                                     ..
                                                 </Button>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#ffd600] hover:bg-[#ffeb3b] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#ffd600")}
-                                                >
-                                                    ..
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-[#b388ff] hover:bg-[#d0b3ff] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                    onClick={() => changeActiveStrokeStyle("#b388ff")}
+                                                    className="bg-[#f08c00] hover:bg-[#e67700] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
+                                                    onClick={() => changeActiveStrokeStyle("#f08c00")}
                                                 >
                                                     ..
                                                 </Button>
@@ -2746,247 +2804,202 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                                                     className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
                                                     style={{ backgroundColor: activeStrokeColor }}
                                                 ></Button>
-
                                             </>
-                                            ) : (
-
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#1e1e1e] hover:bg-[#2a2a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#1e1e1e")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#e03131] hover:bg-[#c92a2a] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#e03131")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#2f9e44] hover:bg-[#2b8a3e] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#2f9e44")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#1971c2] hover:bg-[#1864ab] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#1971c2")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#f08c00] hover:bg-[#e67700] relative cursor-pointer -mr-1 text-transparent rounded-md shadow-sm"
-                                                        onClick={() => changeActiveStrokeStyle("#f08c00")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <PiLineVerticalLight size="20" />
-                                                    <Button
-                                                        size="icon"
-                                                        className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                        style={{ backgroundColor: activeStrokeColor }}
-                                                    ></Button>
-                                                </>
-                                            )
-                                        }
-                                    </div>
+                                        )
+                                    }
                                 </div>
+                            </div>
 
-                                {/* Background */}
-                                <div className="text-sm">
-                                    <h3 className="font-medium py-1.5">Background</h3>
-                                    <div className="flex items-center gap-2">
-                                        {darkMode ?
-                                            (
+                            {/* Background */}
+                            <div className="text-sm">
+                                <h3 className="font-medium py-1.5">Background</h3>
+                                <div className="flex items-center gap-2">
+                                    {darkMode ?
+                                        (
 
-                                                <>
-                                                    {/* Transparent Fill */}
-                                                    <Button
-                                                        size="sm"
-                                                        className="relative cursor-pointer -mr-1 text-transparent hover:bg-transparent bg-transparent border border-gray-400/40 dark:border-white/20 rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#00000000")}
-                                                    >
-                                                        .
-                                                    </Button>
+                                            <>
+                                                {/* Transparent Fill */}
+                                                <Button
+                                                    size="sm"
+                                                    className="relative cursor-pointer -mr-1 text-transparent hover:bg-transparent bg-transparent border border-gray-400/40 dark:border-white/20 rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#00000000")}
+                                                >
+                                                    .
+                                                </Button>
 
-                                                    {/* Yellow Fill */}
-                                                    <Button
-                                                        size="sm"
-                                                        className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
-                                                            ? "bg-[#FFD58699] hover:bg-[#fbc16999]"
-                                                            : "bg-[#FFD58660] hover:bg-[#fbc16960]"
-                                                            }`}
-                                                        onClick={() => changeActiveFillStyle(darkMode ? "#FFD58699" : "#FFD58660")}
-                                                    >
-                                                        ..
-                                                    </Button>
+                                                {/* Yellow Fill */}
+                                                <Button
+                                                    size="sm"
+                                                    className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
+                                                        ? "bg-[#FFD58699] hover:bg-[#fbc16999]"
+                                                        : "bg-[#FFD58660] hover:bg-[#fbc16960]"
+                                                        }`}
+                                                    onClick={() => changeActiveFillStyle(darkMode ? "#FFD58699" : "#FFD58660")}
+                                                >
+                                                    ..
+                                                </Button>
 
-                                                    {/* Red Fill */}
-                                                    <Button
-                                                        size="sm"
-                                                        className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
-                                                            ? "bg-[#FF6B6B99] hover:bg-[#f87b7b99]"
-                                                            : "bg-[#FF989860] hover:bg-[#f87b7b60]"
-                                                            }`}
-                                                        onClick={() => changeActiveFillStyle(darkMode ? "#FF6B6B99" : "#FF989860")}
-                                                    >
-                                                        ..
-                                                    </Button>
+                                                {/* Red Fill */}
+                                                <Button
+                                                    size="sm"
+                                                    className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
+                                                        ? "bg-[#FF6B6B99] hover:bg-[#f87b7b99]"
+                                                        : "bg-[#FF989860] hover:bg-[#f87b7b60]"
+                                                        }`}
+                                                    onClick={() => changeActiveFillStyle(darkMode ? "#FF6B6B99" : "#FF989860")}
+                                                >
+                                                    ..
+                                                </Button>
 
-                                                    {/* Green Fill */}
-                                                    <Button
-                                                        size="sm"
-                                                        className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
-                                                            ? "bg-[#74C69D99] hover:bg-[#a3c69599]"
-                                                            : "bg-[#B9D4AA60] hover:bg-[#a3c69560]"
-                                                            }`}
-                                                        onClick={() => changeActiveFillStyle(darkMode ? "#74C69D99" : "#B9D4AA60")}
-                                                    >
-                                                        ..
-                                                    </Button>
+                                                {/* Green Fill */}
+                                                <Button
+                                                    size="sm"
+                                                    className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
+                                                        ? "bg-[#74C69D99] hover:bg-[#a3c69599]"
+                                                        : "bg-[#B9D4AA60] hover:bg-[#a3c69560]"
+                                                        }`}
+                                                    onClick={() => changeActiveFillStyle(darkMode ? "#74C69D99" : "#B9D4AA60")}
+                                                >
+                                                    ..
+                                                </Button>
 
-                                                    {/* Blue Fill */}
-                                                    <Button
-                                                        size="sm"
-                                                        className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
-                                                            ? "bg-[#4dabf799] hover:bg-[#6fc9f999]"
-                                                            : "bg-[#8DD8FF60] hover:bg-[#6fc9f960]"
-                                                            }`}
-                                                        onClick={() => changeActiveFillStyle(darkMode ? "#4dabf799" : "#8DD8FF60")}
-                                                    >
-                                                        ..
-                                                    </Button>
+                                                {/* Blue Fill */}
+                                                <Button
+                                                    size="sm"
+                                                    className={`relative cursor-pointer -mr-1 text-transparent rounded-md ${darkMode
+                                                        ? "bg-[#4dabf799] hover:bg-[#6fc9f999]"
+                                                        : "bg-[#8DD8FF60] hover:bg-[#6fc9f960]"
+                                                        }`}
+                                                    onClick={() => changeActiveFillStyle(darkMode ? "#4dabf799" : "#8DD8FF60")}
+                                                >
+                                                    ..
+                                                </Button>
 
-                                                    <PiLineVerticalLight size="20" />
+                                                <PiLineVerticalLight size="20" />
 
-                                                    {/* Active Fill Preview */}
-                                                    <Button
-                                                        size="icon"
-                                                        className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                        style={{ backgroundColor: activeFillStyle }}
-                                                    />
-                                                </>
+                                                {/* Active Fill Preview */}
+                                                <Button
+                                                    size="icon"
+                                                    className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                    style={{ backgroundColor: activeFillStyle }}
+                                                />
+                                            </>
 
-                                            ) : (
-                                                <>
-                                                    <Button
-                                                        size="sm"
-                                                        className="relative cursor-pointer -mr-1 text-transparent hover:bg-transparent bg-transparent border border-gray-400/40 dark:border-white/20 rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#eeeeee00")}
-                                                    >
-                                                        .
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#FFD58660] hover:bg-[#fbc16960] relative cursor-pointer -mr-1 text-transparent rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#FFD58660")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#FF989860] hover:bg-[#f87b7b60] relative cursor-pointer -mr-1 text-transparent rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#FF989860")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#B9D4AA60] hover:bg-[#a3c69560] relative cursor-pointer -mr-1 text-transparent rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#B9D4AA60")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        className="bg-[#8DD8FF60] hover:bg-[#6fc9f960] relative cursor-pointer -mr-1 text-transparent rounded-md"
-                                                        onClick={() => changeActiveFillStyle("#8DD8FF60")}
-                                                    >
-                                                        ..
-                                                    </Button>
-                                                    <PiLineVerticalLight size="20" />
-                                                    <Button
-                                                        size="icon"
-                                                        className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
-                                                        style={{ backgroundColor: activeFillStyle }}
-                                                    ></Button>
-                                                </>
-                                            )
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    className="relative cursor-pointer -mr-1 text-transparent hover:bg-transparent bg-transparent border border-gray-400/40 dark:border-white/20 rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#eeeeee00")}
+                                                >
+                                                    .
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-[#FFD58660] hover:bg-[#fbc16960] relative cursor-pointer -mr-1 text-transparent rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#FFD58660")}
+                                                >
+                                                    ..
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-[#FF989860] hover:bg-[#f87b7b60] relative cursor-pointer -mr-1 text-transparent rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#FF989860")}
+                                                >
+                                                    ..
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-[#B9D4AA60] hover:bg-[#a3c69560] relative cursor-pointer -mr-1 text-transparent rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#B9D4AA60")}
+                                                >
+                                                    ..
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-[#8DD8FF60] hover:bg-[#6fc9f960] relative cursor-pointer -mr-1 text-transparent rounded-md"
+                                                    onClick={() => changeActiveFillStyle("#8DD8FF60")}
+                                                >
+                                                    ..
+                                                </Button>
+                                                <PiLineVerticalLight size="20" />
+                                                <Button
+                                                    size="icon"
+                                                    className="relative cursor-default -mr-1 border border-neutral-400 dark:border-neutral-700 rounded-md"
+                                                    style={{ backgroundColor: activeFillStyle }}
+                                                ></Button>
+                                            </>
+                                        )
 
-                                        }
-                                    </div>
+                                    }
                                 </div>
+                            </div>
 
-                                {/* Stroke Width */}
-                                <div className="text-sm">
-                                    <h3 className="font-medium py-1.5">Stroke Width</h3>
-                                    <div className="flex items-center gap-2">
-                                        {[3, 6, 9].map((width, i) => (
-                                            <Button
-                                                key={width}
-                                                size="sm"
-                                                className={`relative cursor-pointer -mr-1  rounded-md ${activestrokeWidth === width
-                                                    ? "bg-[#E95C0C] hover:bg-[#E95C0C] text-white dark:text-white"
-                                                    : "bg-[#fbcfa1] hover:bg-[#f5c186] text-black dark:text-gray-200 dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423]"
-                                                    }`}
-                                                onClick={() => changeActiveLineWidth(width)}
+                            {/* Stroke Width */}
+                            <div className="text-sm">
+                                <h3 className="font-medium py-1.5">Stroke Width</h3>
+                                <div className="flex items-center gap-2">
+                                    {[3, 6, 9].map((width, i) => (
+                                        <Button
+                                            key={width}
+                                            size="sm"
+                                            className={`relative cursor-pointer -mr-1  rounded-md ${activestrokeWidth === width
+                                                ? "bg-[#E95C0C] hover:bg-[#E95C0C] text-white dark:text-white"
+                                                : "bg-[#fbcfa1] hover:bg-[#f5c186] text-black dark:text-gray-200 dark:bg-[#3e2d1e] dark:hover:bg-[#4b3423]"
+                                                }`}
+                                            onClick={() => changeActiveLineWidth(width)}
+                                        >
+                                            <svg
+                                                aria-hidden="true"
+                                                focusable="false"
+                                                role="img"
+                                                viewBox="0 0 20 20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
                                             >
-                                                <svg
-                                                    aria-hidden="true"
-                                                    focusable="false"
-                                                    role="img"
-                                                    viewBox="0 0 20 20"
-                                                    fill="none"
+                                                <path
+                                                    d="M5 10h10"
                                                     stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path
-                                                        d="M5 10h10"
-                                                        stroke="currentColor"
-                                                        strokeWidth={`${1.25 + i * 1.25}`}
-                                                    ></path>
-                                                </svg>
-                                            </Button>
-                                        ))}
-                                    </div>
+                                                    strokeWidth={`${1.25 + i * 1.25}`}
+                                                ></path>
+                                            </svg>
+                                        </Button>
+                                    ))}
                                 </div>
-
                             </div>
+
                         </div>
-
-                    )
-                    ) : (
-                        <></>
-                    )}
-
-                {/* SIDE BAR SECTION ONLY UNDO/REDO + ZOOM CONTROLS  */}
-                <div className="fixed left-3 md:left-10 bottom-16 md:bottom-3 z-20 flex flex-col gap-2 w-fit h-fit">
-                    {/* Theme Toggle */}
-                    <div className="hidden md:block bg-orange-200/50 dark:bg-orange-300/10 rounded-md p-1.5">
-                        <ThemeToggle />
-                    </div>
-                    <div className="block md:hidden  ">
-                        <ModeToggle />
                     </div>
 
-                    {/* Zoom Controls */}
-                    <div className="hidden md:block bg-white dark:bg-black rounded-md">
-                        <div className="bg-orange-200/50 dark:bg-orange-300/10 p-1 flex items-center rounded-md">
-                            <Button
-                                size="icon"
-                                className="bg-transparent relative cursor-pointer -mr-1 hover:bg-orange-300/40 dark:hover:bg-orange-300/20"
-                                onClick={() => zoomToPoint(scale.current - 0.1)}
-                            >
-                                <PiMinus className="text-orange-800 dark:text-orange-200" size="18" />
-                            </Button>
-                            <PiLineVerticalLight className="text-orange-800 dark:text-orange-200" size="20" />
+                )
+                ) : (
+                    <></>
+                )}
+
+            {/* SIDE BAR SECTION ONLY UNDO/REDO + ZOOM CONTROLS  */}
+            <div className="fixed left-3 md:left-10 bottom-16 md:bottom-3 z-20 flex flex-col gap-2 w-fit h-fit">
+                {/* Theme Toggle */}
+                <div className="hidden md:block bg-orange-200/50 dark:bg-orange-300/10 rounded-md p-1.5">
+                    <ThemeToggle />
+                </div>
+                <div className="block md:hidden  ">
+                    <ModeToggle />
+                </div>
+
+                {/* Zoom Controls */}
+                <div className="hidden md:block bg-white dark:bg-black rounded-md">
+                    <div className="bg-orange-200/50 dark:bg-orange-300/10 p-1 flex items-center rounded-md">
+                        <Button
+                            size="icon"
+                            className="bg-transparent relative cursor-pointer -mr-1 hover:bg-orange-300/40 dark:hover:bg-orange-300/20"
+                            onClick={() => zoomToPoint(scale.current - 0.1)}
+                        >
+                            <PiMinus className="text-orange-800 dark:text-orange-200" size="18" />
+                        </Button>
+                        <PiLineVerticalLight className="text-orange-800 dark:text-orange-200" size="20" />
+                        <TooltipProvider>
                             <Tooltip>
                                 <TooltipTrigger asChild>
                                     <Button
@@ -3001,110 +3014,73 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                                     <p>Reset Zoom</p>
                                 </TooltipContent>
                             </Tooltip>
-                            <PiLineVerticalLight className="text-orange-800 dark:text-orange-200" size="20" />
-                            <Button
-                                size="icon"
-                                className="bg-transparent relative cursor-pointer -ml-1 hover:bg-orange-300/40 dark:hover:bg-orange-300/20"
-                                onClick={() => zoomToPoint(scale.current + 0.1)}
-                            >
-                                <PiPlus className="text-orange-800 dark:text-orange-200" size="18" />
-                            </Button>
-                        </div>
+                        </TooltipProvider>
+                        <PiLineVerticalLight className="text-orange-800 dark:text-orange-200" size="20" />
+                        <Button
+                            size="icon"
+                            className="bg-transparent relative cursor-pointer -ml-1 hover:bg-orange-300/40 dark:hover:bg-orange-300/20"
+                            onClick={() => zoomToPoint(scale.current + 0.1)}
+                        >
+                            <PiPlus className="text-orange-800 dark:text-orange-200" size="18" />
+                        </Button>
                     </div>
-
-
-                    {/* UNDO REDO  */}
-                    {/* <div className="bg-neutral-900 rounded-md">
-                <div className="bg-green-400/25 p-1 flex gap-2 items-center rounded-md">
-                    <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                        size="icon"
-                        className="relative cursor-pointer border-r border-green-900 -mr-1 rounded-r-none bg-green-600/40 hover:bg-green-600/60"
-                        onClick={executeUndo}
-                        disabled={!canUndo}
-                        >
-                        <GrUndo className="text-white" size="18" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Undo</p>
-                    </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                        size="icon"
-                        className="relative cursor-pointer border-l border-green-900 -ml-1 rounded-l-none bg-green-600/40 hover:bg-green-600/60"
-                        onClick={executeRedo}
-                        disabled={!canRedo}
-                        >
-                        <GrRedo className="text-white" size="18" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Redo</p>
-                    </TooltipContent>
-                    </Tooltip>
-                </div>
-                </div> */}
                 </div>
 
-                <CanvasMobile
-                    activeAction={activeAction}
-                    setActiveAction={setActiveAction}
-                    activeDraw={activeDraw}
-                    shapeSelectionBox={shapeSelectionBox}
-                    activeShape={activeShape}
-                    setActiveShape={setActiveShape}
-                    isDragging={isDragging}
-                    selectedShape={selectedShape}
-                    setSelectedShape={setSelectedShape}
-                    darkMode={darkMode}
-                    changeActiveStrokeStyle={changeActiveStrokeStyle}
-                    activeStrokeColor={activeStrokeColor}
-                    setActiveStrokeColor={setActiveStrokeColor}
-                    changeActiveFont={changeActiveFont}
-                    changeActiveFontSize={changeActiveFontSize}
-                    activeFontSize={activeFontSize}
-                    activeFont={activeFont}
-                    activestrokeWidth={activestrokeWidth}
-                    changeActiveLineWidth={changeActiveLineWidth}
-                    changeActiveFillStyle={changeActiveFillStyle}
-                    activeFillStyle={activeFillStyle}
-                    selectedDraw={selectedDraw}
-                    textInp={textInp}
-                    hiddenInputRef={hiddenInputRef}
-                />
-
-
-                {/* ------------------------------- */}
-                {/* FOR BOTH CLIENT SIDE AND SERVER SIDE RENDERING OF CANVAS -> SINCE WINDOW OBJECT IS ONLY PRESENT IN CLIENT/BROWSER -> PRVENTS ERRORS AND AVOID CRASHING  */}
-                {isClient ? (
-                    <canvas
-                        tabIndex={0}
-                        ref={canvasRef}
-                        // bg-neutral-50 dark:bg-neutral-900 
-                        className=" absolute top-0 left-0 z-1 "
-                        width={window.innerWidth}
-                        height={window.innerHeight}
-                    ></canvas>
-
-                ) : (
-
-                    <canvas
-                        tabIndex={0}
-                        ref={canvasRef}
-                        className="bg-neutral-50 dark:bg-neutral-900 "
-                    ></canvas>
-
-                )}
-                {/* ------------------------------- */}
-
-                <Toaster richColors position="top-right" />
             </div>
-        </TooltipProvider>
 
+            <CanvasMobile
+                activeAction={activeAction}
+                setActiveAction={setActiveAction}
+                activeDraw={activeDraw}
+                shapeSelectionBox={shapeSelectionBox}
+                activeShape={activeShape}
+                setActiveShape={setActiveShape}
+                isDragging={isDragging}
+                selectedShape={selectedShape}
+                setSelectedShape={setSelectedShape}
+                darkMode={darkMode}
+                changeActiveStrokeStyle={changeActiveStrokeStyle}
+                activeStrokeColor={activeStrokeColor}
+                setActiveStrokeColor={setActiveStrokeColor}
+                changeActiveFont={changeActiveFont}
+                changeActiveFontSize={changeActiveFontSize}
+                activeFontSize={activeFontSize}
+                activeFont={activeFont}
+                activestrokeWidth={activestrokeWidth}
+                changeActiveLineWidth={changeActiveLineWidth}
+                changeActiveFillStyle={changeActiveFillStyle}
+                activeFillStyle={activeFillStyle}
+                selectedDraw={selectedDraw}
+                textInp={textInp}
+                hiddenInputRef={hiddenInputRef}
+            />
+
+
+            {/* ------------------------------- */}
+            {/* FOR BOTH CLIENT SIDE AND SERVER SIDE RENDERING OF CANVAS -> SINCE WINDOW OBJECT IS ONLY PRESENT IN CLIENT/BROWSER -> PRVENTS ERRORS AND AVOID CRASHING  */}
+            {isClient ? (
+                <canvas
+                    tabIndex={0}
+                    ref={canvasRef}
+                    // bg-neutral-50 dark:bg-neutral-900 
+                    className=" absolute top-0 left-0 z-1 "
+                    width={window.innerWidth}
+                    height={window.innerHeight}
+                ></canvas>
+
+            ) : (
+
+                <canvas
+                    tabIndex={0}
+                    ref={canvasRef}
+                    className="bg-neutral-50 dark:bg-neutral-900 "
+                ></canvas>
+
+            )}
+            {/* ------------------------------- */}
+
+            <Toaster richColors position="top-right" />
+        </div>
 
     )
 }

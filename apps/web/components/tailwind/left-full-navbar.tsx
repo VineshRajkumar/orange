@@ -12,7 +12,8 @@ const LeftFullNavbar = () => {
 
     useEffect(() => {
         if (status === true) {
-            router.push('/dashboard')
+            // router.push('/dashboard')
+            router.replace('/dashboard')
         }
     }, [status, router])
 

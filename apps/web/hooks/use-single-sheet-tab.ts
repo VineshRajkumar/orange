@@ -36,7 +36,8 @@ export function useSingleSheetTab(
         if (msg.tabId === tabId) {
           if (message) toast(message);
           else toast("This sheet is alredy open in one tab")
-          setTimeout(() => router.push("/dashboard"), 1000);
+          // setTimeout(() => router.push("/dashboard"), 1000);
+          setTimeout(() => router.replace("/dashboard"), 1000);
         }
       }
     };

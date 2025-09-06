@@ -8,7 +8,6 @@ import {
     AlertDialogFooter,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import { useAuthStore } from "@/store/Auth";
 import { useRouter } from "next/navigation";
 import { useSheetStore } from "@/store/Sheets";
 import { joinToRoom } from "@/actions/joinRoom.action";
+import { InfoTooltip } from "./info-tooltip";
 
 const JoinRoomComponent = ({ children }: { children: React.ReactNode }) => {
     const [url, setUrl] = useState("");
@@ -37,7 +37,7 @@ const JoinRoomComponent = ({ children }: { children: React.ReactNode }) => {
         }
 
 
-        joinToRoom({url,setAlertMessage,setShowAlert,setJoinRoomLoader,saveSheet,updateRoomId,setUrl,setOpen,router,type:'userFromDashboard'})
+        joinToRoom({ url, setAlertMessage, setShowAlert, setJoinRoomLoader, saveSheet, updateRoomId, setUrl, setOpen, router, type: 'userFromDashboard' })
 
     };
 
@@ -51,24 +51,23 @@ const JoinRoomComponent = ({ children }: { children: React.ReactNode }) => {
                 <AlertDialogHeader>
                     <div className="flex items-center gap-2">
                         <AlertDialogTitle>Join Room</AlertDialogTitle>
-                        <TooltipProvider>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    >
-                                        <Info className="h-4 w-4" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-sm p-2">
-                                    <p className="text-sm leading-snug">
-                                        <strong>Note:</strong> Paste the link you received for the collaborative
-                                        session. Once joined, you will be able to draw with others in real-time.
-                                    </p>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+
+                        <InfoTooltip
+                            content={
+                                <p className="text-sm leading-snug">
+                                    <strong>Note:</strong> Paste the link you received for the collaborative
+                                    session. Once joined, you will be able to draw with others in real-time.
+                                </p>
+                            }
+                        >
+                            <button
+                                type="button"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <Info className="h-4 w-4" />
+                            </button>
+                        </InfoTooltip>
+
                     </div>
                     <AlertDialogDescription>
                         Enter the full room link to join an existing session.

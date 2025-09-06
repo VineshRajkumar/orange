@@ -31,7 +31,8 @@ export default function PopupBanner() {
             className="bg-orange-500 text-white hover:bg-orange-600"
             onClick={() => {
               setOpen(false)
-              router.push('/signup')
+              // router.push('/signup')
+              router.replace('/signup')
             }}
           >
             Register Now

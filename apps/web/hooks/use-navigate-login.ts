@@ -5,7 +5,8 @@ import { useEffect } from "react";
 export const useNavigateToLogin = ({status, router}:{status:boolean | "loading" ,  router: AppRouterInstance}) => {
     useEffect(() => {
         if (status === false) {
-            setTimeout(() => router.push('/login'), 2500);
+            // setTimeout(() => router.push('/login'), 2500);
+            setTimeout(() => router.replace('/login'), 2500);
         }
     }, [status, router])
 }

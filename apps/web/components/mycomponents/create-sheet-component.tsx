@@ -9,7 +9,6 @@ import {
     AlertDialogFooter,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -20,6 +19,7 @@ import axios from '@/lib/axios'
 import { ApiResponse } from "@/types/responses.type"
 import { ApiError } from "@repo/backend-common"
 import { AlertCircle, Info } from "lucide-react"
+import { InfoTooltip } from "./info-tooltip"
 
 
 export default function CreateSheetComponent({ children }: { children: React.ReactNode }) {
@@ -44,6 +44,8 @@ export default function CreateSheetComponent({ children }: { children: React.Rea
                 throw new Error('handleCreateSheet Error :: Failed to create new sheet')
             }
             toast.success(res.message)
+            setTimeout(() => (toast.info('Reload the page to see updates')), 1500)
+
 
         } catch (err) {
 
@@ -82,31 +84,30 @@ export default function CreateSheetComponent({ children }: { children: React.Rea
                         <AlertDialogTitle >
                             Create New Sheet
                         </AlertDialogTitle>
-                        <TooltipProvider >
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <button
-                                        type="button"
-                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    >
-                                        <Info className="h-4 w-4" />
-                                    </button>
-                                </TooltipTrigger>
-                                <TooltipContent side='top' className="max-w-sm p-2">
-                                    <div className="text-sm leading-snug">
-                                        <strong>Note:</strong>
-                                        <ul className="list-disc pl-4 space-y-1">
-                                            <li>You can draw, save, and start collaborative sessions on any sheet.</li>
-                                            <li>Guests can save only <em>one sheet</em>. After that, all work goes to their personal copy.</li>
-                                            <li>If you own the sheet, all changes (before/after session) stay on the same sheet. Otherwise, saving creates your own duplicate.</li>
-                                            <li>Guests who save once in a session cannot save again in the room sheet.</li>
-                                            <li>Personal sheets have no limit—you can run as many sessions as you want.</li>
-                                            <li>You can only join one room at a time. Joining another will remove you from the current one.</li>
-                                        </ul>
-                                    </div>
-                                </TooltipContent>
-                            </Tooltip>
-                        </TooltipProvider>
+                        
+                        <InfoTooltip content={
+                            <div className="text-sm leading-snug">
+                                <strong>Note:</strong>
+                                <ul className="list-disc pl-4 space-y-1">
+                                    <li>You can draw, save, and start collaborative sessions on any sheet.</li>
+                                    <li>Guests can save only <em>one sheet</em>. After that, all work goes to their personal copy.</li>
+                                    <li>If you own the sheet, all changes (before/after session) stay on the same sheet. Otherwise, saving creates your own duplicate.</li>
+                                    <li>Guests who save once in a session cannot save again in the room sheet.</li>
+                                    <li>Personal sheets have no limit—you can run as many sessions as you want.</li>
+                                    <li>You can only join one room at a time. Joining another will remove you from the current one.</li>
+                                </ul>
+                            </div>
+                        }>
+                            <button
+                                type="button"
+                                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                            >
+                                <Info className="h-4 w-4" />
+                            </button>
+
+                        </InfoTooltip>
+
+
                     </div>
                     <AlertDialogDescription >
                         Give your sheet a title and get started!

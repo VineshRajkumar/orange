@@ -41,5 +41,5 @@ app.on("error",(error)=>{
     throw error
 })
 app.listen(process.env.PORT||8000,()=>{
-    console.log(`Server running at port : http://localhost:${process.env.PORT}/`)
+    console.log(`Server running at port : ${process.env.BACKEND_URL}`)
 })

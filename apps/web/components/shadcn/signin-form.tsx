@@ -42,7 +42,8 @@ export function SigninForm() {
       toast.success(res.message)
    
       startTransition(() => {
-        setTimeout(() => router.push('/login'), 1000);
+        // setTimeout(() => router.push('/login'), 1000);
+        setTimeout(() => router.replace('/login'), 1000);
       })
 
 

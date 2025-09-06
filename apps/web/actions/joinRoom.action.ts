@@ -26,7 +26,8 @@ export const joinToRoom = async ({url,setAlertMessage,setShowAlert,setJoinRoomLo
 
     try {
         // Extract IDs from the URL
-        const match = url.match(/\/canvas\/myroom\/([^\/]+)\/([^\/]+)/);
+        const cleanedUrl = url.trim(); //to remove extra spaces
+        const match = cleanedUrl.match(/\/canvas\/myroom\/([^\/]+)\/([^\/]+)/);
         if (!match || match.length < 3) {
 
             if(type==='userFromLink') toast.error("Invalid room link format")

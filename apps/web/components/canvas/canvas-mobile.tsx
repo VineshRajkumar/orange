@@ -25,7 +25,7 @@ import {
     PiSquare,
     PiSquareFill,
 } from "react-icons/pi";
-import { BsFonts, BsPaintBucket } from 'react-icons/bs';
+import { BsFonts } from 'react-icons/bs';
 import { LiaHandPaper, LiaHandRock } from 'react-icons/lia';
 import { GiLaserGun } from 'react-icons/gi';
 
@@ -85,6 +85,19 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
             "#8DD8FF60",
         ];
     const strokeWidths = [3, 6, 9]
+
+    const [openShapeDropdown, setOpenShapeDropdown] = React.useState<boolean>(false)
+
+    const handleSelectShapeDropdown = () => {
+        setOpenShapeDropdown(false);
+    };
+
+    const fontLabels: Record<string, string> = {
+        Arial: "Ar",
+        Verdana: "Ve",
+        "Comic Sans MS": "Co",
+    };
+
 
 
     return (
@@ -147,7 +160,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                         </p>
                     </Button>
 
-                    <DropdownMenu>
+                    <DropdownMenu open={openShapeDropdown} onOpenChange={setOpenShapeDropdown}>
 
                         {/* Dropdown trigger */}
                         <DropdownMenuTrigger asChild>
@@ -173,6 +186,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                                         activeDraw.current = null;
                                         shapeSelectionBox.current = null;
                                     }
+                                    handleSelectShapeDropdown()
                                 }}
                             >
                                 {activeAction === "draw" && activeShape === "rectangle" ? (
@@ -203,6 +217,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                                         activeDraw.current = null;
                                         shapeSelectionBox.current = null;
                                     }
+                                    handleSelectShapeDropdown()
                                 }}
                             >
                                 {activeAction === "draw" && activeShape === "diamond" ? (
@@ -229,6 +244,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                                         activeDraw.current = null;
                                         shapeSelectionBox.current = null;
                                     }
+                                    handleSelectShapeDropdown()
                                 }}
                             >
                                 {activeAction === "draw" && activeShape === "circle" ? (
@@ -256,6 +272,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                                         activeDraw.current = null;
                                         shapeSelectionBox.current = null;
                                     }
+                                    handleSelectShapeDropdown()
                                 }}
                             >
                                 <PiLineVertical className="text-black dark:text-white rotate-90" size="18" />
@@ -279,6 +296,7 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                                         activeDraw.current = null;
                                         shapeSelectionBox.current = null;
                                     }
+                                    handleSelectShapeDropdown()
                                 }}
                             >
                                 <PiArrowRight className="text-black dark:text-white " size="18" />
@@ -401,93 +419,186 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                 ((activeShape === "text" || selectedShape === "text") ? (
 
 
-                    <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-10 w-fit h-fit border transform -translate-y-1/2 rounded-md">
-                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
+                    // <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-10 w-fit h-fit border transform -translate-y-1/2 rounded-md">
+                    //     <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
+                    //         <DropdownMenu open={openFontSettingDropdown} onOpenChange={setOpenFontSettingDropdown}>
+                    //             <DropdownMenuTrigger asChild>
+                    //                 <BsPaintBucket size={20} />
+                    //             </DropdownMenuTrigger>
+                    //             <DropdownMenuContent side="top" align="center" className="justify-center flex flex-col-reverse gap-1 min-w-[1rem] mb-3">
+
+                    //                 {/* Text Color Dropdown */}
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button
+                    //                             variant="outline"
+                    //                             size="sm"
+                    //                             className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                    //                             style={{ backgroundColor: activeStrokeColor }}
+                    //                         />
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side="right" className="p-2 grid grid-cols-7 gap-1 w-48">
+                    //                         {(darkMode
+                    //                             ? ["#eeeeee", "#FFD586", "#FF9898", "#B9D4AA", "#8DD8FF"]
+                    //                             : ["#1e1e1e", "#4A90E2", "#50E3C2", "#F5A623", "#FF6F61", "#7ED321", "#BD10E0"]
+                    //                         ).map((color) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={color}
+                    //                                 onSelect={() => {
+                    //                                     changeActiveStrokeStyle(color)
+                    //                                     handleFontSettingDropdown()
+                    //                                 }}
+                    //                                 className="p-2 rounded-md cursor-pointer"
+                    //                             >
+                    //                                 <div
+                    //                                     className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                    //                                     style={{ backgroundColor: color }}
+                    //                                 />
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+                    //                 {/* Font Family Dropdown */}
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button variant="outline" size="sm" className="rounded-md">
+                    //                             {activeFont || "Font"}
+                    //                         </Button>
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side="right" className="min-w-[8rem] flex flex-col">
+                    //                         {["Arial", "Verdana", "Comic Sans MS"].map((font) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={font}
+                    //                                 onSelect={() => {
+                    //                                     changeActiveFont(font)
+                    //                                     handleFontSettingDropdown()
+                    //                                 }}
+                    //                                 className="p-2 cursor-pointer"
+                    //                             >
+                    //                                 <span style={{ fontFamily: font }}>Abc</span>
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+                    //                 {/* Font Size Dropdown */}
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button variant="outline" size="sm" className="rounded-md">
+                    //                             {activeFontSize === "20"
+                    //                                 ? "S"
+                    //                                 : activeFontSize === "40"
+                    //                                     ? "M"
+                    //                                     : activeFontSize === "60"
+                    //                                         ? "L"
+                    //                                         : "Size"}
+                    //                         </Button>
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side="right" className="min-w-[6rem] flex flex-col">
+                    //                         {[20, 40, 60].map((size) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={size}
+                    //                                 onSelect={() => {
+                    //                                     changeActiveFontSize(size)
+                    //                                     handleFontSettingDropdown()
+                    //                                 }}
+                    //                                 className="p-2 cursor-pointer"
+                    //                             >
+                    //                                 {size === 20 ? "S" : size === 40 ? "M" : "L"}
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+                    //             </DropdownMenuContent>
+                    //         </DropdownMenu>
+                    //     </div>
+                    // </div>
+                    <div className="fixed bottom-22 mb-1 left-3 md:hidden block px-2 py-2 z-20 w-10 h-fit border transform -translate-y-1/2 rounded-md">
+                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white flex flex-col items-center">
+
+                            {/* Text Color */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <BsPaintBucket size={20} />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                                        style={{ backgroundColor: activeStrokeColor }}
+                                    />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent side="top" align="center" className="justify-center flex flex-col-reverse gap-1 min-w-[1rem] mb-3">
-
-                                    {/* Text Color Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="rounded-md border border-neutral-400 dark:border-neutral-700"
-                                                style={{ backgroundColor: activeStrokeColor }}
+                                <DropdownMenuContent side="top" className="p-2 grid grid-cols-7 gap-1 w-48">
+                                    {(darkMode
+                                        ? ["#eeeeee", "#FFD586", "#FF9898", "#B9D4AA", "#8DD8FF"]
+                                        : ["#1e1e1e", "#4A90E2", "#50E3C2", "#F5A623", "#FF6F61", "#7ED321", "#BD10E0"]
+                                    ).map((color) => (
+                                        <DropdownMenuItem
+                                            key={color}
+                                            onSelect={() => changeActiveStrokeStyle(color)}
+                                            className="p-2 rounded-md cursor-pointer"
+                                        >
+                                            <div
+                                                className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                                                style={{ backgroundColor: color }}
                                             />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" className="p-2 grid grid-cols-7 gap-1 w-48">
-                                            {(darkMode
-                                                ? ["#eeeeee", "#FFD586", "#FF9898", "#B9D4AA", "#8DD8FF"]
-                                                : ["#1e1e1e", "#4A90E2", "#50E3C2", "#F5A623", "#FF6F61", "#7ED321", "#BD10E0"]
-                                            ).map((color) => (
-                                                <DropdownMenuItem
-                                                    key={color}
-                                                    onSelect={() => changeActiveStrokeStyle(color)}
-                                                    className="p-2 rounded-md cursor-pointer"
-                                                >
-                                                    <div
-                                                        className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-                                    {/* Font Family Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" className="rounded-md">
-                                                {activeFont || "Font"}
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" className="min-w-[8rem] flex flex-col">
-                                            {["Arial", "Verdana", "Comic Sans MS"].map((font) => (
-                                                <DropdownMenuItem
-                                                    key={font}
-                                                    onSelect={() => changeActiveFont(font)}
-                                                    className="p-2 cursor-pointer"
-                                                >
-                                                    <span style={{ fontFamily: font }}>Abc</span>
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-                                    {/* Font Size Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm" className="rounded-md">
-                                                {activeFontSize === "20"
-                                                    ? "S"
-                                                    : activeFontSize === "40"
-                                                        ? "M"
-                                                        : activeFontSize === "60"
-                                                            ? "L"
-                                                            : "Size"}
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" className="min-w-[6rem] flex flex-col">
-                                            {[20, 40, 60].map((size) => (
-                                                <DropdownMenuItem
-                                                    key={size}
-                                                    onSelect={() => changeActiveFontSize(size)}
-                                                    className="p-2 cursor-pointer"
-                                                >
-                                                    {size === 20 ? "S" : size === 40 ? "M" : "L"}
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
+                                        </DropdownMenuItem>
+                                    ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+                            {/* Font Family */}
+                            <DropdownMenu >
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="rounded-md">
+                                        {activeFont ? fontLabels[activeFont] : "F"}
+                                    </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent side="right" className="min-w-[8rem] flex flex-col">
+                                    {["Arial", "Verdana", "Comic Sans MS"].map((font) => (
+                                        <DropdownMenuItem
+                                            key={font}
+                                            onSelect={() => {
+                                                changeActiveFont(font);
+                                            }}
+                                            className="p-2 cursor-pointer"
+                                        >
+                                            <span style={{ fontFamily: font }}>{font}</span> {/* Full name in dropdown */}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Font Size */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="rounded-md">
+                                        {activeFontSize === "20"
+                                            ? "S"
+                                            : activeFontSize === "40"
+                                                ? "M"
+                                                : activeFontSize === "60"
+                                                    ? "L"
+                                                    : "Size"}
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent side="top" className="min-w-[6rem] flex flex-col p-2">
+                                    {[20, 40, 60].map((size) => (
+                                        <DropdownMenuItem
+                                            key={size}
+                                            onSelect={() => changeActiveFontSize(size)}
+                                            className="p-2 cursor-pointer"
+                                        >
+                                            {size === 20 ? "S" : size === 40 ? "M" : "L"}
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
                         </div>
                     </div>
+
 
 
 
@@ -499,99 +610,182 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
                     selectedShape === "line" ? (
                     //FOR ARROW,LINE,FREEHAND(pen/pencil)
 
-                    <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-2 w-fit h-fit border transform -translate-y-1/2 rounded-md">
-                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
+                    // <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-2 w-fit h-fit border transform -translate-y-1/2 rounded-md">
+                    //     <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
+                    //         <DropdownMenu>
+                    //             <DropdownMenuTrigger asChild>
+                    //                 <BsPaintBucket size={20} />
+                    //             </DropdownMenuTrigger>
+                    //             <DropdownMenuContent side="top" align="center" className="justify-center flex flex-col-reverse gap-1 min-w-[1rem] mb-3">
+
+                    //                 {/* Stroke Colors Dropdown */}
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button
+                    //                             variant="outline"
+                    //                             size="sm"
+                    //                             className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                    //                             style={{ backgroundColor: activeStrokeColor }}
+                    //                         />
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side="right" className="p-2 grid grid-cols-6 gap-2 w-48">
+                    //                         {(darkMode ?
+                    //                             ["#ffffff", "#ff4d4f", "#00c853", "#40c4ff", "#ffd600", "#b388ff"] :
+                    //                             ["#1e1e1e", "#e03131", "#2f9e44", "#1971c2", "#f08c00"]
+                    //                         ).map((color) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={color}
+                    //                                 onSelect={() => changeActiveStrokeStyle(color)}
+                    //                                 className="p-2 rounded-md cursor-pointer"
+                    //                             >
+                    //                                 <div
+                    //                                     className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                    //                                     style={{ backgroundColor: color }}
+                    //                                 />
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+                    //                 {/* Stroke Widths Dropdown */}
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button variant="outline" size="sm">
+                    //                             <svg
+                    //                                 aria-hidden="true"
+                    //                                 focusable="false"
+                    //                                 role="img"
+                    //                                 viewBox="0 0 20 20"
+                    //                                 fill="none"
+                    //                                 stroke="currentColor"
+                    //                                 strokeLinecap="round"
+                    //                                 strokeLinejoin="round"
+                    //                             >
+                    //                                 <path
+                    //                                     d="M5 10h10"
+                    //                                     strokeWidth={
+                    //                                         activestrokeWidth === 2
+                    //                                             ? "1.25"
+                    //                                             : activestrokeWidth === 3
+                    //                                                 ? "2.5"
+                    //                                                 : "3.75"
+                    //                                     }
+                    //                                 />
+                    //                             </svg>
+                    //                         </Button>
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side="right" className="min-w-[3rem] flex flex-row">
+                    //                         {[2, 3, 4].map((width, i) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={width}
+                    //                                 onClick={() => changeActiveLineWidth(width)}
+                    //                                 className={`flex items-center gap-2`}
+                    //                             >
+                    //                                 <svg
+                    //                                     aria-hidden="true"
+                    //                                     focusable="false"
+                    //                                     role="img"
+                    //                                     viewBox="0 0 20 20"
+                    //                                     fill="none"
+                    //                                     stroke="currentColor"
+                    //                                     strokeLinecap="round"
+                    //                                     strokeLinejoin="round"
+                    //                                     className="h-6 w-6"
+                    //                                 >
+                    //                                     <path d="M5 10h10" strokeWidth={`${1.25 + i * 1.25}`} />
+                    //                                 </svg>
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+                    //             </DropdownMenuContent>
+                    //         </DropdownMenu>
+                    //     </div>
+                    // </div>
+                    <div className="fixed bottom-26 mb-1 left-3 md:hidden block px-2 py-2 z-20 w-10 h-fit border transform -translate-y-1/2 rounded-md">
+                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white flex flex-col items-center">
+
+                            {/* Stroke Color */}
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <BsPaintBucket size={20} />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                                        style={{ backgroundColor: activeStrokeColor }}
+                                    />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent side="top" align="center" className="justify-center flex flex-col-reverse gap-1 min-w-[1rem] mb-3">
-
-                                    {/* Stroke Colors Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="rounded-md border border-neutral-400 dark:border-neutral-700"
-                                                style={{ backgroundColor: activeStrokeColor }}
+                                <DropdownMenuContent side="top" className="p-2 grid grid-cols-6 gap-2 w-48">
+                                    {(darkMode
+                                        ? ["#ffffff", "#ff4d4f", "#00c853", "#40c4ff", "#ffd600", "#b388ff"]
+                                        : ["#1e1e1e", "#e03131", "#2f9e44", "#1971c2", "#f08c00"]
+                                    ).map((color) => (
+                                        <DropdownMenuItem
+                                            key={color}
+                                            onSelect={() => changeActiveStrokeStyle(color)}
+                                            className="p-2 rounded-md cursor-pointer"
+                                        >
+                                            <div
+                                                className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                                                style={{ backgroundColor: color }}
                                             />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" className="p-2 grid grid-cols-6 gap-2 w-48">
-                                            {(darkMode ?
-                                                ["#ffffff", "#ff4d4f", "#00c853", "#40c4ff", "#ffd600", "#b388ff"] :
-                                                ["#1e1e1e", "#e03131", "#2f9e44", "#1971c2", "#f08c00"]
-                                            ).map((color) => (
-                                                <DropdownMenuItem
-                                                    key={color}
-                                                    onSelect={() => changeActiveStrokeStyle(color)}
-                                                    className="p-2 rounded-md cursor-pointer"
-                                                >
-                                                    <div
-                                                        className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-                                    {/* Stroke Widths Dropdown */}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" size="sm">
-                                                <svg
-                                                    aria-hidden="true"
-                                                    focusable="false"
-                                                    role="img"
-                                                    viewBox="0 0 20 20"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                >
-                                                    <path
-                                                        d="M5 10h10"
-                                                        strokeWidth={
-                                                            activestrokeWidth === 2
-                                                                ? "1.25"
-                                                                : activestrokeWidth === 3
-                                                                    ? "2.5"
-                                                                    : "3.75"
-                                                        }
-                                                    />
-                                                </svg>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side="right" className="min-w-[3rem] flex flex-row">
-                                            {[2, 3, 4].map((width, i) => (
-                                                <DropdownMenuItem
-                                                    key={width}
-                                                    onClick={() => changeActiveLineWidth(width)}
-                                                    className={`flex items-center gap-2`}
-                                                >
-                                                    <svg
-                                                        aria-hidden="true"
-                                                        focusable="false"
-                                                        role="img"
-                                                        viewBox="0 0 20 20"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        className="h-6 w-6"
-                                                    >
-                                                        <path d="M5 10h10" strokeWidth={`${1.25 + i * 1.25}`} />
-                                                    </svg>
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
+                                        </DropdownMenuItem>
+                                    ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+                            {/* Stroke Width */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="rounded-md">
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            role="img"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path
+                                                d="M5 10h10"
+                                                strokeWidth={
+                                                    activestrokeWidth === 2 ? 1.25 : activestrokeWidth === 3 ? 2.5 : 3.75
+                                                }
+                                            />
+                                        </svg>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent side="top" className="min-w-[3rem] flex flex-row p-2 gap-2">
+                                    {[2, 3, 4].map((width, i) => (
+                                        <DropdownMenuItem
+                                            key={width}
+                                            onSelect={() => changeActiveLineWidth(width)}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <svg
+                                                aria-hidden="true"
+                                                focusable="false"
+                                                role="img"
+                                                viewBox="0 0 20 20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="h-6 w-6"
+                                            >
+                                                <path d="M5 10h10" strokeWidth={`${1.25 + i * 1.25}`} />
+                                            </svg>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
                         </div>
                     </div>
+
 
 
                 ) : (
@@ -599,145 +793,267 @@ const CanvasMobile = ({ activeAction, setActiveAction, activeDraw, shapeSelectio
 
 
 
-                    <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-2 w-fit h-fit border transform -translate-y-1/2  rounded-md">
-                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
-                            <DropdownMenu  >
+                    // <div className="fixed bottom-32 mb-1 left-3 md:hidden block px-2 py-2 z-2 w-fit h-fit border transform -translate-y-1/2  rounded-md">
+                    //     <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white">
+                    //         <DropdownMenu  open={openShapeSettingDropdown} onOpenChange={setOpenShapeSettingDropdown} >
+                    //             <DropdownMenuTrigger asChild>
+                    //                 <BsPaintBucket size={20} />
+                    //             </DropdownMenuTrigger>
+                    //             <DropdownMenuContent side='top' align='center' className='justify-center flex flex-col-reverse gap-1  min-w-[1rem] mb-3 '>
+                    //                 {/* Stroke */}
+
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button
+                    //                             variant="outline"
+                    //                             size='sm'
+                    //                             className="rounded-md border  border-neutral-400 dark:border-neutral-700"
+                    //                             style={{ backgroundColor: activeStrokeColor }}
+                    //                         />
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side='right' className="p-2 grid grid-cols-6 gap-2 w-48">
+                    //                         {strokeColors.map((color) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={color}
+                    //                                 onSelect={() => {
+                    //                                     changeActiveStrokeStyle(color)
+                    //                                     handleShapeSettingDropdown()
+                    //                                 }}
+                    //                                 className="p-2 rounded-md cursor-pointer"
+                    //                             >
+                    //                                 <div
+                    //                                     className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                    //                                     style={{ backgroundColor: color }}
+                    //                                 />
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+
+                    //                 {/* Background */}
+
+                    //                 <DropdownMenu>
+                    //                     <DropdownMenuTrigger asChild>
+                    //                         <Button
+                    //                             variant="outline"
+                    //                             size='sm'
+                    //                             className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                    //                             style={{ backgroundColor: activeFillStyle }}
+                    //                         />
+                    //                     </DropdownMenuTrigger>
+                    //                     <DropdownMenuContent side='right' className="p-2 grid grid-cols-6 gap-2 w-48">
+                    //                         {backgroundColors.map((color) => (
+                    //                             <DropdownMenuItem
+                    //                                 key={color}
+                    //                                 onSelect={() => {
+                    //                                     changeActiveFillStyle(color)
+                    //                                     handleShapeSettingDropdown()
+                    //                                 }}
+                    //                                 className="p-2 rounded-md cursor-pointer"
+                    //                             >
+                    //                                 <div
+                    //                                     className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                    //                                     style={{ backgroundColor: color }}
+                    //                                 />
+                    //                             </DropdownMenuItem>
+                    //                         ))}
+                    //                     </DropdownMenuContent>
+                    //                 </DropdownMenu>
+
+
+
+                    //                 {/* Stroke Width */}
+
+                    //                 <div className="text-sm">
+                    //                     <div className="md:hidden block">
+                    //                         <DropdownMenu>
+                    //                             <DropdownMenuTrigger asChild>
+                    //                                 <Button
+                    //                                     variant="outline"
+                    //                                     size='sm'
+
+                    //                                 >
+                    //                                     <span className="flex items-center">
+                    //                                         <svg
+                    //                                             aria-hidden="true"
+                    //                                             focusable="false"
+                    //                                             role="img"
+                    //                                             viewBox="0 0 20 20"
+                    //                                             fill="none"
+                    //                                             stroke="currentColor"
+                    //                                             strokeLinecap="round"
+                    //                                             strokeLinejoin="round"
+                    //                                         // className="h-5 w-5"
+                    //                                         >
+                    //                                             <path
+                    //                                                 d="M5 10h10"
+                    //                                                 stroke="currentColor"
+                    //                                                 strokeWidth={
+                    //                                                     activestrokeWidth === 3
+                    //                                                         ? "1.25"
+                    //                                                         : activestrokeWidth === 6
+                    //                                                             ? "2.5"
+                    //                                                             : "3.75"
+                    //                                                 }
+                    //                                             />
+                    //                                         </svg>
+
+                    //                                     </span>
+                    //                                 </Button>
+                    //                             </DropdownMenuTrigger>
+                    //                             <DropdownMenuContent side='right' className="min-w-[3rem] flex flex-row">
+                    //                                 {strokeWidths.map((width, i) => (
+                    //                                     <DropdownMenuItem
+                    //                                         key={width}
+                    //                                         onClick={() => {
+                    //                                             changeActiveLineWidth(width)
+                    //                                             handleShapeSettingDropdown()
+                    //                                         }}
+                    //                                         className={`flex items-center gap-2 `}
+                    //                                     >
+                    //                                         <svg
+                    //                                             aria-hidden="true"
+                    //                                             focusable="false"
+                    //                                             role="img"
+                    //                                             viewBox="0 0 20 20"
+                    //                                             fill="none"
+                    //                                             stroke="currentColor"
+                    //                                             strokeLinecap="round"
+                    //                                             strokeLinejoin="round"
+                    //                                             className="h-6 w-6"
+                    //                                         >
+                    //                                             <path
+                    //                                                 d="M5 10h10"
+                    //                                                 stroke="currentColor"
+                    //                                                 strokeWidth={`${1.25 + i * 1.25}`}
+                    //                                             ></path>
+                    //                                         </svg>
+
+                    //                                     </DropdownMenuItem>
+                    //                                 ))}
+                    //                             </DropdownMenuContent>
+                    //                         </DropdownMenu>
+                    //                     </div>
+                    //                 </div>
+
+                    //             </DropdownMenuContent>
+                    //         </DropdownMenu>
+                    //     </div>
+                    // </div>
+
+                    <div className="fixed bottom-22 mb-1 left-3 md:hidden block px-2 py-2 z-20 w-10 h-fit border transform -translate-y-1/2 rounded-md">
+                        <div className="space-y-2 rounded-md text-black bg-white dark:bg-black dark:text-white flex flex-col items-center">
+
+                            {/* Stroke Color */}
+                            <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                    <BsPaintBucket size={20} />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                                        style={{ backgroundColor: activeStrokeColor }}
+                                    />
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent side='top' align='center' className='justify-center flex flex-col-reverse gap-1  min-w-[1rem] mb-3 '>
-                                    {/* Stroke */}
-
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size='sm'
-                                                className="rounded-md border  border-neutral-400 dark:border-neutral-700"
-                                                style={{ backgroundColor: activeStrokeColor }}
+                                <DropdownMenuContent side="top" className="p-2 grid grid-cols-6 gap-2 w-48">
+                                    {strokeColors.map((color) => (
+                                        <DropdownMenuItem
+                                            key={color}
+                                            onSelect={() => {
+                                                changeActiveStrokeStyle(color);
+                                            }}
+                                            className="p-2 rounded-md cursor-pointer"
+                                        >
+                                            <div
+                                                className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                                                style={{ backgroundColor: color }}
                                             />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side='right' className="p-2 grid grid-cols-6 gap-2 w-48">
-                                            {strokeColors.map((color) => (
-                                                <DropdownMenuItem
-                                                    key={color}
-                                                    onSelect={() => changeActiveStrokeStyle(color)}
-                                                    className="p-2 rounded-md cursor-pointer"
-                                                >
-                                                    <div
-                                                        className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-
-                                    {/* Background */}
-
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size='sm'
-                                                className="rounded-md border border-neutral-400 dark:border-neutral-700"
-                                                style={{ backgroundColor: activeFillStyle }}
-                                            />
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent side='right' className="p-2 grid grid-cols-6 gap-2 w-48">
-                                            {backgroundColors.map((color) => (
-                                                <DropdownMenuItem
-                                                    key={color}
-                                                    onSelect={() => changeActiveFillStyle(color)}
-                                                    className="p-2 rounded-md cursor-pointer"
-                                                >
-                                                    <div
-                                                        className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
-                                                        style={{ backgroundColor: color }}
-                                                    />
-                                                </DropdownMenuItem>
-                                            ))}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-
-
-                                    {/* Stroke Width */}
-
-                                    <div className="text-sm">
-                                        <div className="md:hidden block">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        size='sm'
-
-                                                    >
-                                                        <span className="flex items-center">
-                                                            <svg
-                                                                aria-hidden="true"
-                                                                focusable="false"
-                                                                role="img"
-                                                                viewBox="0 0 20 20"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                            // className="h-5 w-5"
-                                                            >
-                                                                <path
-                                                                    d="M5 10h10"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth={
-                                                                        activestrokeWidth === 3
-                                                                            ? "1.25"
-                                                                            : activestrokeWidth === 6
-                                                                                ? "2.5"
-                                                                                : "3.75"
-                                                                    }
-                                                                />
-                                                            </svg>
-
-                                                        </span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent side='right' className="min-w-[3rem] flex flex-row">
-                                                    {strokeWidths.map((width, i) => (
-                                                        <DropdownMenuItem
-                                                            key={width}
-                                                            onClick={() => changeActiveLineWidth(width)}
-                                                            className={`flex items-center gap-2 `}
-                                                        >
-                                                            <svg
-                                                                aria-hidden="true"
-                                                                focusable="false"
-                                                                role="img"
-                                                                viewBox="0 0 20 20"
-                                                                fill="none"
-                                                                stroke="currentColor"
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                className="h-6 w-6"
-                                                            >
-                                                                <path
-                                                                    d="M5 10h10"
-                                                                    stroke="currentColor"
-                                                                    strokeWidth={`${1.25 + i * 1.25}`}
-                                                                ></path>
-                                                            </svg>
-
-                                                        </DropdownMenuItem>
-                                                    ))}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    </div>
-
+                                        </DropdownMenuItem>
+                                    ))}
                                 </DropdownMenuContent>
                             </DropdownMenu>
+
+                            {/* Fill/Background Color */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="rounded-md border border-neutral-400 dark:border-neutral-700"
+                                        style={{ backgroundColor: activeFillStyle }}
+                                    />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent side="top" className="p-2 grid grid-cols-6 gap-2 w-48">
+                                    {backgroundColors.map((color) => (
+                                        <DropdownMenuItem
+                                            key={color}
+                                            onSelect={() => {
+                                                changeActiveFillStyle(color);
+                                            }}
+                                            className="p-2 rounded-md cursor-pointer"
+                                        >
+                                            <div
+                                                className="w-5 h-5 rounded-sm border border-black/20 dark:border-white/20"
+                                                style={{ backgroundColor: color }}
+                                            />
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            {/* Stroke Width */}
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" size="sm" className="rounded-md">
+                                        <svg
+                                            aria-hidden="true"
+                                            focusable="false"
+                                            role="img"
+                                            viewBox="0 0 20 20"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        >
+                                            <path
+                                                d="M5 10h10"
+                                                strokeWidth={
+                                                    activestrokeWidth === 3 ? 1.25 : activestrokeWidth === 6 ? 2.5 : 3.75
+                                                }
+                                            />
+                                        </svg>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent side="top" className="min-w-[3rem] flex flex-row p-2 gap-2">
+                                    {strokeWidths.map((width, i) => (
+                                        <DropdownMenuItem
+                                            key={width}
+                                            onSelect={() => {
+                                                changeActiveLineWidth(width);
+                                            }}
+                                            className="flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <svg
+                                                aria-hidden="true"
+                                                focusable="false"
+                                                role="img"
+                                                viewBox="0 0 20 20"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                className="h-6 w-6"
+                                            >
+                                                <path d="M5 10h10" strokeWidth={`${1.25 + i * 1.25}`} />
+                                            </svg>
+                                        </DropdownMenuItem>
+                                    ))}
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
                         </div>
                     </div>
+
 
 
 
