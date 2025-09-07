@@ -8,7 +8,7 @@ import {
     AlertDialogFooter,
     AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -28,6 +28,15 @@ const JoinRoomComponent = ({ children }: { children: React.ReactNode }) => {
     const updateRoomId = useAuthStore((state) => state.updateRoomId);
     const [alertMessage, setAlertMessage] = useState("");
     const router = useRouter();
+
+    useEffect(() => {
+        const pendingLink = localStorage.getItem("pendingJoinLink");
+        if (pendingLink) {
+            setUrl(pendingLink);
+            setOpen(true); // auto-open modal if pendingLink was set -> then that means that user joins from link so redirect him to dashbaord and open model with the link and let the user click join
+            localStorage.removeItem("pendingJoinLink");
+        }
+    }, []);
 
     const joinRoom = async () => {
         if (!url.trim()) {

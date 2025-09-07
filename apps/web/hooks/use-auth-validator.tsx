@@ -24,7 +24,7 @@ export function useAuthValidator(type:'canvas'|'notcanvas') {
         // if loggedin user only then no issue continue 
         
         if(type === 'canvas') await new Promise((resolve) => setTimeout(resolve, 14000));
-        else await new Promise((resolve) => setTimeout(resolve, 3000));
+        else await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const response = await axios.get("/users/current-user") as AxiosResponse
         const res = response.data as ApiResponse
@@ -55,5 +55,5 @@ export function useAuthValidator(type:'canvas'|'notcanvas') {
       if (redirectTimer) clearTimeout(redirectTimer);
     };
 
-  }, [logout,router]);
+  }, [logout,router,type]);
 }

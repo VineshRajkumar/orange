@@ -22,7 +22,7 @@ export const loginAsGuest = async({login,setGuestLoader,setSuccess, setError,typ
     try {
         if(setGuestLoader) setGuestLoader(true);
 
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+        // await new Promise((resolve) => setTimeout(resolve, 2000));
 
         const response = await axios.post("/users/login-guest") as AxiosResponse;
 
@@ -53,13 +53,13 @@ export const loginAsGuest = async({login,setGuestLoader,setSuccess, setError,typ
         }
         else {
             setSuccess?.(res.message) 
-
-            startTransition(() => {
-                // setTimeout(() => router.push('/dashboard'), 1000);
-                setTimeout(() => router.replace('/dashboard'), 1000);
-            })
         }
         // toast.success(res.message)
+
+        startTransition(() => {
+            // setTimeout(() => router.push('/dashboard'), 1000);
+            setTimeout(() => router.replace('/dashboard'), 1000);
+        })
 
         
 

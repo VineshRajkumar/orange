@@ -59,7 +59,7 @@ import { loadSheetWithSheetId } from "@/actions/loadSheet.action";
 import { joinToRoom } from "@/actions/joinRoom.action";
 import { useSingleSheetTab } from "@/hooks/use-single-sheet-tab";
 import { InfoTooltip } from "../mycomponents/info-tooltip";
-import { useAuthValidator } from "@/hooks/use-auth-validator";
+
 
 
 
@@ -104,6 +104,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     const [savebtnLoader, setSavebtnLoader] = useState<boolean>(false)
     const [sessionLoader, setSessionLoader] = useState<boolean>(false)
     const [copied, setCopied] = useState<boolean>(false);
+    const [success, setSuccess] = useState(false)
 
 
 
@@ -121,7 +122,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
     //-------------------------------------
     //Custom hook to check if browser supports cookie storage if not then after 5sec this will log him out 
-    useAuthValidator('canvas')
+    // useAuthValidator('canvas')
 
 
     // ------------------------------------------------------------------------
@@ -1675,7 +1676,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
     }
 
-
+    /*//Previously planned :- 
     const handleUnAuthorizedUsers = useCallback(async (mode: "session" | "sheet") => {
 
         //1) login the guest first 
@@ -1705,6 +1706,44 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
 
     }, [login, router, saveSheet, sheetId, handleStartWebsocketServer, roomId, updateRoomId])
+    */
+
+    const handleUnAuthorizedUsersRedirectToDashbaord = useCallback(async (mode: "session" | "sheet") => {
+
+        //1) login the guest first 
+        //2) Redirect the guest to dashbaord 
+        //3) If they are joining room then now open the popup in dashbaord with the link -> if user is not in incognito then he will click join and it will get joined otherwise UnAuthorized request
+        //4) If they want to check shared sheet then wait for 2sec show a toast while in that two sec just check if they are logged in and then redirect them to shared sheet page
+
+        await loginAsGuest({ login, type: 'canvas', router })
+        console.log("Guest login done")
+
+        // tiny delay helps mobile browsers commit cookies before next request
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        // router.replace("/dashboard");
+
+        if (mode === 'session') {
+            const link = `${window.location.origin}/canvas/myroom/${sheetId}/${roomId}`
+            localStorage.setItem("pendingJoinLink", link);
+        }
+        else {
+            // Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
+            await loadSheetWithSheetId({ sheetId, saveSheet, setSuccess })
+
+            // navigate to sheet view
+            if( success === true ) {
+                toast.info('Redirecting to shared sheet ...')
+                setTimeout(() => router.replace(`/canvas/myroom/${sheetId}/share-allowed`), 1500); 
+            }
+            else {
+                toast.info('Redirecting to homepage ...')
+                setTimeout(() => router.replace('/'), 1500);
+            }
+        }
+
+
+    }, [login, router, saveSheet, sheetId, roomId,success])
 
     //joining directly link was provided to these users 
     //automatic login for users as guest who join from link and users/guest who join from dashboard 
@@ -1764,21 +1803,29 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                 if (!accessToken) {
 
+                    /* Previously Planned 
+                        //UnAuthorized user 
+                        // Checking if cookies are allowed
+                        // a) has roomId then that means its a webscoket session 
+                        // b) no roomId then that means share sheet
+                        // localStorage.setItem("originalUser", "false")
+
+                        // if (!areCookiesEnabled()) {
+                        //     toast.error("Your browser does not allow cookies. You cannot join a session.");
+                        //     return; 
+                        // }
+                        
+                        if (roomId && !shareSheetAllowed) {
+                            await handleUnAuthorizedUsers("session");
+                        } else {
+                            await handleUnAuthorizedUsers("sheet");
+                        }
+                    */
                     //UnAuthorized user 
-                    // Checking if cookies are allowed
-                    // a) has roomId then that means its a webscoket session 
-                    // b) no roomId then that means share sheet
-                    // localStorage.setItem("originalUser", "false")
-
-                    // if (!areCookiesEnabled()) {
-                    //     toast.error("Your browser does not allow cookies. You cannot join a session.");
-                    //     return; 
-                    // }
-
                     if (roomId && !shareSheetAllowed) {
-                        await handleUnAuthorizedUsers("session");
+                        await handleUnAuthorizedUsersRedirectToDashbaord("session");
                     } else {
-                        await handleUnAuthorizedUsers("sheet");
+                        await handleUnAuthorizedUsersRedirectToDashbaord("sheet");
                     }
 
                 }
@@ -1786,6 +1833,8 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             } catch (err) {
                 // console.log('wrong login as guest')
                 console.log("Error while checking access token:", err);
+
+                /* Previosly Planned
                 // localStorage.setItem("originalUser", "false")
 
                 // if (!areCookiesEnabled()) {
@@ -1793,17 +1842,23 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                 //     return; 
                 // }
 
+                // if (roomId && !shareSheetAllowed) {
+                //     await handleUnAuthorizedUsers("session");
+                // } else {
+                //     await handleUnAuthorizedUsers("sheet");
+                // }*/
+
                 if (roomId && !shareSheetAllowed) {
-                    await handleUnAuthorizedUsers("session");
+                    await handleUnAuthorizedUsersRedirectToDashbaord("session");
                 } else {
-                    await handleUnAuthorizedUsers("sheet");
+                    await handleUnAuthorizedUsersRedirectToDashbaord("sheet");
                 }
             }
         };
 
         checkAccess();
 
-    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, handleUnAuthorizedUsers, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId, router])
+    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId, router,handleUnAuthorizedUsersRedirectToDashbaord])
 
 
 

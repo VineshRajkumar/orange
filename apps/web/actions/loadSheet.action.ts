@@ -10,10 +10,10 @@ interface LoadSheetProps {
     setLoadSheetLoader?: (state: boolean) => void;
     saveSheet: (id: string, sheet: SheetDataType) => void;
     message?: string;
-    
+    setSuccess?: (state: boolean) => void;
 }
 
-export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet,message}:LoadSheetProps) => {
+export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet,message,setSuccess}:LoadSheetProps) => {
 
     try {
         if(setLoadSheetLoader) setLoadSheetLoader(true)
@@ -31,12 +31,15 @@ export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet
         //save sheet in zustand along with others
         saveSheet(id,sheetDataReceived)
 
+        if(setSuccess) setSuccess(true)
         toast.success(res.message)
 
     } catch (err) {
+        
+        if(setSuccess) setSuccess(false)
 
         const error = err as AxiosError
-
+        
         if (error.response && error.response.data) {
 
             const data = error.response.data as ApiError;
