@@ -1733,6 +1733,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             // Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
             await loadSheetWithSheetId({ sheetId, saveSheet, setSuccess })
 
+            await new Promise((resolve) => setTimeout(resolve, 2000));
             // navigate to sheet view
             if( success === true ) {
                 setGuestLogin(true)
@@ -1743,7 +1744,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             else {
                 toast.info('Redirecting to homepage ...')
                 
-                setTimeout(() => router.push('/'), 4000);
+                setTimeout(() => router.replace('/'), 4000);
             }
         }
 
