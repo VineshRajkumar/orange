@@ -105,6 +105,8 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     const [sessionLoader, setSessionLoader] = useState<boolean>(false)
     const [copied, setCopied] = useState<boolean>(false);
     const [success, setSuccess] = useState(false)
+    const [guestLogin, setGuestLogin] = useState(false)
+    const didRun = useRef<boolean>(false);
 
 
 
@@ -1733,12 +1735,15 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
             // navigate to sheet view
             if( success === true ) {
+                setGuestLogin(true)
                 toast.info('Redirecting to shared sheet ...')
-                setTimeout(() => router.replace(`/canvas/myroom/${sheetId}/share-allowed`), 1500); 
+
+                setTimeout(() => router.replace(`/canvas/myroom/${sheetId}/share-allowed`), 4000); 
             }
             else {
                 toast.info('Redirecting to homepage ...')
-                setTimeout(() => router.replace('/'), 1500);
+                
+                setTimeout(() => router.push('/'), 4000);
             }
         }
 
@@ -1747,9 +1752,14 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
     //joining directly link was provided to these users 
     //automatic login for users as guest who join from link and users/guest who join from dashboard 
+    
     useEffect(() => {
 
         const checkAccess = async () => {
+
+            //run this only once or else there will be multiple guest login for oneuser 
+            if (didRun.current) return; 
+            didRun.current = true;
 
             const shareSheetAllowed = roomId === 'share-allowed'
 
@@ -1795,7 +1805,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
                         console.log("Authorized user opened someone else shared sheet");
                         // localStorage.setItem("originalUser", "false")
-                        await loadSheetWithSheetId({ sheetId, saveSheet })
+                        if( guestLogin === false ) await loadSheetWithSheetId({ sheetId, saveSheet })
 
                     }
                     return
@@ -1858,7 +1868,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
 
         checkAccess();
 
-    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId, router,handleUnAuthorizedUsersRedirectToDashbaord])
+    }, [handleStartWebsocketServer, roomId, sheetId, isLoading, getSheet, saveSheet, userData?.id, updateRoomId, userData?.roomId, router,handleUnAuthorizedUsersRedirectToDashbaord, guestLogin])
 
 
 
