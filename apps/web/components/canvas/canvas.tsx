@@ -1721,7 +1721,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
         console.log("Guest login done")
 
         // tiny delay helps mobile browsers commit cookies before next request
-        await new Promise((resolve) => setTimeout(resolve, 300));
+        await new Promise((resolve) => setTimeout(resolve, 3000));
 
         // router.replace("/dashboard");
 

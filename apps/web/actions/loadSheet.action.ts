@@ -24,7 +24,7 @@ export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet
             throw new Error('loadSheetWithSheetId Error :: Sheet not loaded')
         }
         const sheet = res?.data as SheetWithId
-        // console.log(sheet)
+        console.log(sheet)
         //extracting id and data
         const {id, ...sheetDataReceived} = sheet
 
