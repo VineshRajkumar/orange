@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 
 export default function BentoGrid() {
   return (
@@ -35,7 +35,7 @@ export default function BentoGrid() {
                 playsInline
                 preload="auto"
               >
-                <source src="/bento/team.mp4" type="video/mp4" />
+                <source src="/bento/team.webm" type="video/webm" />
                 Your browser does not support the video tag.
               </video>
             </div>
@@ -55,15 +55,17 @@ export default function BentoGrid() {
               </p>
             </div>
             <div className="mt-6 relative aspect-[4/3.6] w-full overflow-hidden rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-100 dark:bg-neutral-800">
-              <Image
-                src="/bento/calm.gif"
-                alt="Calm UI experience"
-                fill
-                className="object-cover"
-                sizes="100vw"
-                priority
-                unoptimized
-              />
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="object-cover w-full h-full"
+                preload="auto"
+              >
+                <source src="/bento/calm.webm" type="video/webm" />
+                Your browser does not support the video tag.
+              </video>
             </div>
           </div>
 
