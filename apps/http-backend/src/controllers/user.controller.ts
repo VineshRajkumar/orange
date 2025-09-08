@@ -234,6 +234,11 @@ const loginUser: RequestHandler = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid User Credentials");
   }
 
+  //prevent user another login from another browser or the same browser
+  if (user.refreshToken) {
+    throw new ApiError(400, "User already logged in on another device");
+  }
+
   //access and refreshtoken generate
   const { accessToken, refreshToken } =
     await generateAccessTokenandRefreshToken(user);

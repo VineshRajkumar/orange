@@ -1732,7 +1732,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             // Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
             const success = await loadSheetWithSheetId({ sheetId, saveSheet })
 
-            console.log('sucess',success)
+            // console.log('sucess',success)
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
             // navigate to sheet view
