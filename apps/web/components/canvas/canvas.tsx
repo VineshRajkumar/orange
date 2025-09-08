@@ -1794,7 +1794,9 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                     return;
                 }
                 if (accessToken && typeof accessToken === "string" && sheetId && shareSheetAllowed) {
-                    // Authorized -> in case of sharing check if the user is sheet owner and if not then that means sheet is shared 
+                    // Authorized -> in case of sharing check if the user is sheet owner and if not then that means sheet is shared
+                    
+                    /*Previosly Planned
                     const isSheetOwner = getSheet(sheetId)?.ownerId === userData?.id
 
                     if (isSheetOwner) {
@@ -1810,6 +1812,16 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
                         if( guestLogin === false ) await loadSheetWithSheetId({ sheetId, saveSheet })
 
                     }
+                    */
+
+                    //according to new plan the sheet owner cant open his same sheet in new tab beacuse of use-single-sheet-tab hook 
+                    //so no need to check for owner of sheet as owner cant open his same sheet so person who will open will be some other user 
+                    
+                    //user opened someone elses sheet -> then load the sheet from db for their zustand :- 
+                    console.log("Authorized user opened someone else shared sheet");
+                    // localStorage.setItem("originalUser", "false")
+                    if( guestLogin === false ) await loadSheetWithSheetId({ sheetId, saveSheet })
+
                     return
                 }
 
