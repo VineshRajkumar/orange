@@ -1733,7 +1733,11 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
             // Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
             await loadSheetWithSheetId({ sheetId, saveSheet, setSuccess })
 
+            //ERROR :- ISSUE WITH SHARING SHEET -> SHEET DO COME -> CONSOLE LOF success AND CHECK -> ALSO CHECK BY REMOVING  if( guestLogin === false ) await loadSheetWithSheetId({ sheetId, saveSheet })
+            console.log('sucess before',success)
             await new Promise((resolve) => setTimeout(resolve, 2000));
+
+            console.log('sucess after',success)
             // navigate to sheet view
             if( success === true ) {
                 setGuestLogin(true)

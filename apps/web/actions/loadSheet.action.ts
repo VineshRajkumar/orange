@@ -5,12 +5,13 @@ import { SheetDataType, SheetWithId } from "@/types/sheet.type";
 import { toast } from "sonner";
 import { ApiError } from "@repo/backend-common";
 
+
 interface LoadSheetProps {
     sheetId: string
-    setLoadSheetLoader?: (state: boolean) => void;
+    setLoadSheetLoader?: (value: React.SetStateAction<boolean>) => void
     saveSheet: (id: string, sheet: SheetDataType) => void;
     message?: string;
-    setSuccess?: (state: boolean) => void;
+    setSuccess?: (value: React.SetStateAction<boolean>) => void
 }
 
 export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet,message,setSuccess}:LoadSheetProps) => {
