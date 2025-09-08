@@ -1,4 +1,4 @@
-![orange screenshot](/images/ogimage.png)
+![orange screenshot](https://github.com/VineshRajkumar/orange/blob/main/apps/web/public/images/ogimage.png)
 
 # Orange Board
 
