@@ -2,6 +2,7 @@ import {Router} from "express";
 import { verifyJWT } from "../middlewares/auth.middleware";
 import { changeCurrentPassword,  getAccessToken,  getCurrentUser,  loginGuestUser,  loginUser, logoutUser, refreshAccessToken, registerUser, updateAccountDetails } from "../controllers/user.controller";
 import { checkAlreadyLoggedIn } from "../middlewares/checkAlredyLoggedIn.middleware";
+import { guestLoginLimiter } from "../middlewares/guestLogin-rateLimiter.middleware";
 
 const userRouter = Router()
 
@@ -9,7 +10,7 @@ userRouter.route("/register").post(registerUser)
 
 userRouter.route("/login").post(checkAlreadyLoggedIn, loginUser)
 
-userRouter.route("/login-guest").post(checkAlreadyLoggedIn, loginGuestUser)
+userRouter.route("/login-guest").post( guestLoginLimiter , checkAlreadyLoggedIn, loginGuestUser)
 
 //secured routes
 userRouter.route("/logout").post(verifyJWT, logoutUser) //verifyJWT is a middleware

@@ -23,8 +23,11 @@ export default function PrivacyPolicyPage() {
 
         <h2 className="text-xl font-semibold mt-8 mb-2">1. Guest Mode</h2>
         <p className="mb-4">
-          When you use Orange Board as a guest, we do <strong>not</strong> collect or store your IP address or any personal information.
-          We may use browser storage (like <code>localStorage</code>) to temporarily track guest session usage, but this data stays only in your browser and can be cleared anytime.
+          When you use Orange Board as a guest, we do <strong>not</strong> collect or store your personal information.
+          For security purposes, we may temporarily check your IP address <em>only</em> to apply rate limiting
+          (to prevent abuse of the guest login feature). However, we do <strong>not</strong> log, save, or associate
+          your IP with your activity. We may also use browser storage (like <code>localStorage</code>) to
+          temporarily track guest session usage, but this data stays only in your browser and can be cleared anytime.
         </p>
 
         <h2 className="text-xl font-semibold mt-8 mb-2">2. Cookies</h2>
