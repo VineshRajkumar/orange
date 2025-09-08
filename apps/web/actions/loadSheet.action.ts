@@ -11,10 +11,9 @@ interface LoadSheetProps {
     setLoadSheetLoader?: (value: React.SetStateAction<boolean>) => void
     saveSheet: (id: string, sheet: SheetDataType) => void;
     message?: string;
-    setSuccess?: (value: React.SetStateAction<boolean>) => void
 }
 
-export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet,message,setSuccess}:LoadSheetProps) => {
+export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet,message}:LoadSheetProps) => {
 
     try {
         if(setLoadSheetLoader) setLoadSheetLoader(true)
@@ -25,19 +24,17 @@ export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet
             throw new Error('loadSheetWithSheetId Error :: Sheet not loaded')
         }
         const sheet = res?.data as SheetWithId
-        console.log(sheet)
         //extracting id and data
         const {id, ...sheetDataReceived} = sheet
 
         //save sheet in zustand along with others
         saveSheet(id,sheetDataReceived)
 
-        if(setSuccess) setSuccess(true)
         toast.success(res.message)
+        return true;
 
     } catch (err) {
         
-        if(setSuccess) setSuccess(false)
 
         const error = err as AxiosError
         
@@ -50,6 +47,8 @@ export const loadSheetWithSheetId = async ({sheetId,setLoadSheetLoader,saveSheet
         } else {
             toast.error(error.message || "Unexpected error occurred.");
         }
+
+        return false;
 
     } finally {
         if(setLoadSheetLoader) setLoadSheetLoader(false)

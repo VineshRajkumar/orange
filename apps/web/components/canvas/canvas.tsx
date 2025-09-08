@@ -104,7 +104,6 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
     const [savebtnLoader, setSavebtnLoader] = useState<boolean>(false)
     const [sessionLoader, setSessionLoader] = useState<boolean>(false)
     const [copied, setCopied] = useState<boolean>(false);
-    const [success, setSuccess] = useState(false)
     const [guestLogin, setGuestLogin] = useState(false)
     const didRun = useRef<boolean>(false);
 
@@ -1731,13 +1730,11 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
         }
         else {
             // Load the sheet for the guest to view and save it in zustand (Temporary only saved ) but if user clicks save then permanent saved 
-            await loadSheetWithSheetId({ sheetId, saveSheet, setSuccess })
+            const success = await loadSheetWithSheetId({ sheetId, saveSheet })
 
-            //ERROR :- ISSUE WITH SHARING SHEET -> SHEET DO COME -> CONSOLE LOF success AND CHECK -> ALSO CHECK BY REMOVING  if( guestLogin === false ) await loadSheetWithSheetId({ sheetId, saveSheet })
-            console.log('sucess before',success)
+            console.log('sucess',success)
             await new Promise((resolve) => setTimeout(resolve, 2000));
 
-            console.log('sucess after',success)
             // navigate to sheet view
             if( success === true ) {
                 setGuestLogin(true)
@@ -1753,7 +1750,7 @@ export default function Canvas({ sheetId, roomId }: { sheetId: string, roomId?: 
         }
 
 
-    }, [login, router, saveSheet, sheetId, roomId,success])
+    }, [login, router, saveSheet, sheetId, roomId])
 
     //joining directly link was provided to these users 
     //automatic login for users as guest who join from link and users/guest who join from dashboard 
