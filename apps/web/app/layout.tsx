@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import '../app/styles/globals.css'
 import { seo, siteConfig } from "@/components/seo/data";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Analytics } from "@vercel/analytics/next"
 
 //since this is now a global layout file according to nextjs so writing the main things that are common in all files 
 export const metadata: Metadata = {
@@ -43,7 +44,7 @@ export default function RootLayout({
                 >
 
                     {children}
-
+                    <Analytics />
                 </ThemeProvider>
 
             </body>
