@@ -1,4 +1,4 @@
-![orange screenshot](/Week_22/Orange/apps/web/public/images/ogimage.png)
+![orange screenshot](/images/ogimage.png)
 
 # Orange Board
 
