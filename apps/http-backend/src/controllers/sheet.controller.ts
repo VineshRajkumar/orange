@@ -1,12 +1,35 @@
 import { RequestHandler } from "express-serve-static-core"
 import { asyncHandler } from "../utils/asyncHandler"
-import { ApiError } from "@repo/backend-common";
+import { ApiError, draw_elementsType } from "@repo/backend-common";
 import { zodErrorFormat , saveSheetDataSchema  } from "@repo/zodschemas";
 import { prisma } from "@repo/database";
 import * as sheetService from "../services/sheet.services";
 import { ApiResponse } from "../utils/ApiResponse";
 
+//since freehand doesnot need x1,y1,x2,y2 and text doesnot need x2,y2 so sometimes it can come as null so this cleanElement will rmeove those
+const cleanElement = (elements: draw_elementsType[]) => {
+  if (!elements || !elements.length) return [];
 
+  return elements.map((element) => {
+    const cleaned = { ...element };
+
+    switch (element.type) {
+      case "freeHand":
+        delete cleaned.x1;
+        delete cleaned.y1;
+        delete cleaned.x2;
+        delete cleaned.y2;
+        break;
+      case "text":
+        delete cleaned.x2;
+        delete cleaned.y2;
+        break;
+    }
+
+    return cleaned;
+  });
+
+};
 
 const makeSheet:RequestHandler = asyncHandler(async (req,res)=>{
     //Steps :- 
@@ -115,7 +138,16 @@ const saveSheet:RequestHandler = asyncHandler(async (req,res)=>{
     const isGuest = req.user.isGuest
 
     //Zod Validation
-    const result = saveSheetDataSchema.safeParse(req.body);
+    // console.log(req.body)
+
+    const { sheetId: raw_sheetId, data: raw_data } = req.body;
+
+    const cleanedData = cleanElement(raw_data)
+    // console.log(cleanedData)
+
+    const newPayload = { sheetId: raw_sheetId , data: cleanedData };
+
+    const result = saveSheetDataSchema.safeParse(newPayload);
     // console.log(result)
 
     if (!result.success) {
