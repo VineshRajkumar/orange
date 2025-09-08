@@ -30,7 +30,7 @@ export default function RootLayout({
 
         <html suppressHydrationWarning lang="en">
             <head>
-                {/* <meta name="google-site-verification" content="m430e2fTgc2fp0gSlvgXhAGSe-ZLiD5gKFmK2Q25ek4" /> */}
+                <meta name="google-site-verification" content="m430e2fTgc2fp0gSlvgXhAGSe-ZLiD5gKFmK2Q25ek4" />
                 <meta name="apple-mobile-web-app-title" content="Orange" />
             </head>
             <body >
