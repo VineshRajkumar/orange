@@ -32,14 +32,16 @@ const LoginAsGuestButton = () => {
 
     const handleloginAsGuest = async () => {
 
-        
-        loginAsGuest({login,setGuestLoader,setSuccess,setError,type:'notcanvas',router})
+
+        loginAsGuest({ login, setGuestLoader, setSuccess, setError, type: 'notcanvas', router })
 
     };
 
     return (
 
         <div className="flex items-center gap-2">
+
+
             <AlertDialog >
                 <AlertDialogTrigger asChild>
                     <Button variant="outline" disabled={trialUsed}>
@@ -60,6 +62,9 @@ const LoginAsGuestButton = () => {
                             <AlertDialogTitle>Guest Mode Limitations</AlertDialogTitle>
                         </div>
 
+                        <div className="w-full max-w-md p-2 bg-yellow-100 text-yellow-800 border border-yellow-300 rounded text-sm text-center">
+                            ⚠️ Our backend is hosted on a free server. The first request may take up to 50 seconds to respond. After that, you can use the app normally. If you return later, it may take 50 seconds again. We apologize for the delay — once the site grows, we’ll switch to a paid server. Please do not refresh and wait for the guest login to complete.
+                        </div>
                         <AlertDialogDescription className="text-sm mt-2">
                             This is a temporary guest session and will automatically expire after <strong>2 hours</strong>.<br /><br />
                             You are allowed to create only <strong>one room sheet</strong>. However, you may still join rooms created by others using shared links.<br /><br />
